@@ -5,7 +5,7 @@ var app = express();
 app.use(logfmt.requestLogger());
 
 app.get('/', function(req, res) {
-  res.send('Welcome to Salesforce Migration Tool! (' + (process.env.COMPANY_NAME || "ITBconsult") + " - " + (process.env.NODE_EVN || "development") + ")");
+  res.send('Welcome to Salesforce Migration Tool! (' + (process.env.COMPANY_NAME || "ITBconsult") + " - " + (process.env.NODE_ENV || "development") + ")");
 });
 
 var port = process.env.PORT || 5000;
