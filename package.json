@@ -11,10 +11,11 @@
   "dependencies": {
     "logfmt": "~0.18.1",
     "express": "~3.4.7",
-    "metaforce": "git://github.com/tstachl/metaforce.git#master",
-    "nforce": "~0.6.0",
+    "jade": "~0.35.0",
+    "mongoose": ">= 2.6.5",
     "soap": "~0.3.1",
-    "jade": "~0.35.0"
+    "nforce": "~0.6.0",
+    "metaforce": "git://github.com/tstachl/metaforce.git#master"
   },
   "engines": {
     "node": "0.10.x"

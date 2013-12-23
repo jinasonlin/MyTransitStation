@@ -6,6 +6,7 @@ app.use(logfmt.requestLogger());
 app.set("view engine", "jade");
 app.set("view options", {layout: true});
 app.set("views", __dirname + "/views");
+app.use(express.static(__dirname + '/public'));
 
 app.configure("production", function() {
   // Do some production-specific action
