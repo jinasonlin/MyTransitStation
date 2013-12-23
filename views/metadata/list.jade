@@ -1,0 +1,7 @@
+extends ../layouts/layout-default
+
+block content
+  h1 Metadata Type List
+  ul
+    for meta in metadataObjects
+      li #{meta.xmlName}

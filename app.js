@@ -1,11 +1,17 @@
-var express = require("express");
-var logfmt = require("logfmt");
-var app = express();
+var express = require("express")
+  , logfmt = require("logfmt")
+  , app = express()
+  , site = require('./controller/site')
+  , user = require('./controller/user')
+  , metadata = require('./controller/metadata');
 
 app.use(logfmt.requestLogger());
 app.set("view engine", "jade");
 app.set("view options", {layout: true});
 app.set("views", __dirname + "/views");
+app.use(express.cookieParser());
+app.use(express.bodyParser());
+app.use(express.methodOverride());
 app.use(express.static(__dirname + '/public'));
 
 app.configure("production", function() {
@@ -21,12 +27,11 @@ app.configure("development", function() {
   console.log("running on development");
 });
 
-app.get("/", function(req, res) {
-  res.render("index", {companyName: process.env.COMPANY_NAME || "ITBconsult", env: process.env.NODE_ENV || "development"});
-});
+app.get("/", site.index);
+app.get("/user/login", user.login);
+app.get("/metadata/list", metadata.list);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {
   console.log("Listening on " + port);
 });
-
