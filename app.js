@@ -1,6 +1,7 @@
 var express = require("express")
   , logfmt = require("logfmt")
   , app = express()
+  , authentication = require("./filter/authentication")
   , site = require('./controller/site')
   , user = require('./controller/user')
   , metadata = require('./controller/metadata');
@@ -27,8 +28,11 @@ app.configure("development", function() {
   console.log("running on development");
 });
 
-app.get("/", site.index);
-app.get("/user/login", user.login);
+
+app.get("/", authentication.redirectIfLoggedIn, site.index);
+app.get("/user/login", authentication.redirectIfLoggedIn, user.login);
+
+app.all("/metadata/*", authentication.checkLogin);
 app.get("/metadata/list", metadata.list);
 
 var port = process.env.PORT || 5000;
