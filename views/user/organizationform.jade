@@ -1,0 +1,13 @@
+extends ../layouts/layout-default
+
+block content
+  h1 Welcome to Salesforce Migration Tool! Organization Management
+  if errMessage
+    p #{errMessage}
+  form(method="post", action="/organization")
+    p Name: 
+      input(type="text", name="name")
+    p Description: 
+      input(type="text", name="description")
+    p 
+      input(type="submit", value="Submit")

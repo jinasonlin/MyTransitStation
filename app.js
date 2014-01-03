@@ -1,10 +1,21 @@
 var express = require("express")
+  , mongoose = require('mongoose')
   , logfmt = require("logfmt")
-  , app = express()
-  , authentication = require("./filter/authentication")
-  , site = require('./controller/site')
-  , user = require('./controller/user')
-  , metadata = require('./controller/metadata');
+  , app = express();
+
+// Here we find an appropriate database to connect to, defaulting to
+// localhost if we don't find one.
+var uristring = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/migrationtool';
+
+// Makes connection asynchronously. Mongoose will queue up database
+// operations and release them when the connection is complete.
+mongoose.connect(uristring, function (err, res) {
+  if (err) {
+    console.log('ERROR connecting to: ' + uristring + '. ' + err);
+  } else {
+    console.log('Succeeded connected to: ' + uristring);
+  }
+});
 
 app.use(logfmt.requestLogger());
 app.set("view engine", "jade");
@@ -28,11 +39,8 @@ app.configure("development", function() {
   console.log("running on development");
 });
 
-app.get("/", authentication.redirectIfLoggedIn, site.index);
-app.get("/user/login", authentication.redirectIfLoggedIn, user.login);
-
-app.all("/metadata/*", authentication.checkLogin);
-app.get("/metadata/list", metadata.list);
+var route = require("./route");
+route(app);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {

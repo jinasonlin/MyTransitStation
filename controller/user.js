@@ -1,4 +1,5 @@
 var nodeforce = require("../lib/nodeforce");
+var Organization = require('../model/organization');
 
 exports.login = function(req, res) {
   global.client = nodeforce.createClient({
@@ -14,3 +15,16 @@ exports.login = function(req, res) {
     }
   });
 };
+
+exports.initOrganizationForm = function(req, res) {
+  res.render('user/organizationform');
+}
+
+exports.saveOrganization = function(req, res) {
+  var org = new Organization({
+    name: req.body.name, 
+    description: req.body.description
+  }).save(function (err, org) {
+    res.send("new org saved: " + org);
+  });
+}
