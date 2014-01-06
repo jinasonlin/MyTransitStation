@@ -2,12 +2,10 @@
 html(lang='en')
   head
     title #{title}
-    link(rel='stylesheet', href='/styles/bootstrap.css', type='text/css' )
-    
+    link(rel='stylesheet', href='/styles/bootstrap.css', type='text/css')
     block stylesheet
-    
-    script(type='text/javascript',src="/js/libs/jquery.js")
-    script(type='text/javascript',src="/js/libs/bootstrap.js")
-
+    script(type='text/javascript', src="/js/libs/jquery.js")
+    script(type='text/javascript', src="/js/libs/bootstrap.js")
     block scripts
-  block content
+  body
+    block content

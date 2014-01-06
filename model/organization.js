@@ -7,9 +7,9 @@ var mongoose = require('mongoose')
 var organizationSchema = new Schema({
   name: String,
   description: String,
-  defaultAdminUserId: {type: ObjectId, default: null},
+  defaultAdminUserId: ObjectId,
   createdDate: {type: Date, default: Date.now},
-  createdBy: {type: ObjectId, default: null}
+  createdBy: ObjectId
 });
  
 module.exports = mongoose.model('Organization', organizationSchema);

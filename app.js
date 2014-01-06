@@ -1,5 +1,6 @@
 var express = require("express")
   , mongoose = require('mongoose')
+  , MongoStore = require('connect-mongo')(express)
   , logfmt = require("logfmt")
   , app = express();
 
@@ -25,6 +26,14 @@ app.use(express.cookieParser());
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(express.static(__dirname + '/public'));
+app.use(express.session({
+  secret: "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()",
+  store: new MongoStore({
+    url: uristring,
+    auto_reconnect: true
+  })
+  //cookie: {path: '/', maxAge: null}
+}));
 
 app.configure("production", function() {
   // Do some production-specific action

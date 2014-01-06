@@ -1,6 +1,30 @@
 var nodeforce = require("../lib/nodeforce");
 var Organization = require('../model/organization');
+var User = require('../model/user');
 
+exports.showloginForm = function(req, res) {
+  res.render('user/login-form');
+};
+
+exports.login = function(req, res) {
+  User.findOne({
+    username: req.body.username,
+    password: req.body.password
+  }, function (err, user) {
+    console.log("login with " + req.body.username + ": " + user);
+    if (user != null) {
+      // found valid user
+      req.session.user = user;
+      req.session.save(function(err) {
+        res.redirect('/sfconn');
+      });
+    } else {
+      res.redirect('/');
+    }
+  });
+};
+
+/*
 exports.login = function(req, res) {
   global.client = nodeforce.createClient({
     username: req.body.username,
@@ -27,4 +51,12 @@ exports.saveOrganization = function(req, res) {
   }).save(function (err, org) {
     res.send("new org saved: " + org);
   });
-}
+  var user = new User({
+    username: 'superadmin',
+    password: 'superadmin1', 
+    email: 'lingjun.jiang@itbconsult.com',
+    type: 'superadmin',
+  }).save(function (err, user) {
+    res.send("new user saved: " + user);
+  });
+  */
