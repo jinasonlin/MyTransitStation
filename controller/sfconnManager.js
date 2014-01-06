@@ -2,7 +2,7 @@ var nodeforce = require("../lib/nodeforce"),
  	SFConnection = require("../model/sfconnection");
 
 exports.listSFConn = function(req,res){
-	SFConnection.find(function(err,SFConnections){
+	SFConnection.find({createdBy: req.session.user._id}, function(err,SFConnections){
 		if(err){
 			res.render('sfconnection/sfconnManage',{
 				err:err,
@@ -23,7 +23,8 @@ exports.addSFConn = function(req,res){
 		username : '',
 		password : '',
 		secureToken : '',
-		endpoint : ''
+		endpoint : '',
+		createdBy : req.session.user._id
 	};
 	var isStore=req.body.isStore;
 	if('on' == isStore){
