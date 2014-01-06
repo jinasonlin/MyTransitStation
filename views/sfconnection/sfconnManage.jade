@@ -1,0 +1,119 @@
+extends ../layouts/layout-default
+
+block scripts
+  script(type='text/javascript',src="/js/libs/jquery.js")
+  script(type='text/javascript',src="/js/libs/bootstrap.js")
+  script(type='text/javascript',src="/js/sfconn/main.js")
+
+block content
+  if errMessage
+    p #{errMessage}
+  .container.well.well-lg
+    .page-header
+      h1 
+        span Salesforce Connections
+        button.btn.btn-primary.btn-sm(data-toggle="modal",data-target="#newSFConnPanel",style="margin-left:10px;")
+          span.glyphicon.glyphicon-plus-sign
+          span(style="margin-left:6px;")
+            |New connection
+    for oriSFConn in SFConnections
+      - var sfconnId = oriSFConn.id;
+      .row
+        .col-md-6
+          ul.nav.nav-stacked
+            li.active
+              a(href="#")
+                |#{oriSFConn.name} : #{oriSFConn.username}
+                span#sfconnSignIn.badge.pull-right.badge-signIn
+                  |Sign in
+                span.badge.badge-edit.pull-right(data-toggle="modal",data-target='#'+sfconnId,style="margin-left:2px;margin-right:2px;")
+                  |Edit
+                span.badge.badge-del.pull-right.sfconnDelete(style="margin-right:2px;")
+                  |Delete
+        .modal.fade(id=sfconnId,tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
+          .modal-dialog
+            .modal-content
+              .modal-header
+                button.close(type="button",data-dismiss="modal",aria-hidden="true") &times;
+                h4.modal-title SFConnection
+                  small &nbsp;Edit
+              .modal-body
+                form.form-horizontal.sfconnEditForm(role="form",action="/sfconn/"+sfconnId,method="post")
+                  input(type="hidden",value="put",name="_method")
+                  input(type="hidden",value="#{oriSFConn.createdBy}")
+                  .form-group
+                    label.col-sm-3.control-label E-mail 
+                    .col-sm-8
+                      input.form-control(name="username",type="email",placeholder="Username",value="#{oriSFConn.username}") 
+                  .form-group
+                    label.col-sm-3.control-label SFConn Name
+                    .col-sm-8
+                      input.form-control(name="connName",type="text",placeholder="Connection Name",value="#{oriSFConn.name}")
+                  .form-group
+                    label.col-sm-3.control-label Password 
+                    .col-sm-8
+                      input.form-control(name="password",type="password",placeholder="Password",value="#{oriSFConn.password}")
+                  .form-group
+                    label.col-sm-3.control-label Secure Token 
+                    .col-sm-8
+                      input.form-control(name="secureToken",type="password",placeholder="Secure Token",value="#{oriSFConn.secureToken}")
+                  .form-group
+                    label.col-sm-3.control-label ENV Model
+                    .col-sm-8
+                      select.form-control(name="endpoint",value="#{oriSFConn.conn_env}")
+                        option.form-control(value="test.salesforce.com") sandbox
+                        option.form-control(value="login.salesforce.com") production
+                  .form-group
+                    .validInfo.alert.alert-success.col-sm-8.col-sm-offset-3(style='display:none;').
+                        You org connects well.
+                    .unValideInfo.alert.alert-danger.col-sm-8.col-sm-offset-3(style='display:none;').
+                        Can't connect to Salesforce.Please check your input infos.
+                    .col-sm-offset-3.col-sm-8(style="text-align: right;")
+                      button.connValidate.btn.btn-warning(type="button",style="margin-right: 10px;") Validate
+                      button.btn.btn-primary(type="submit",style="margin-right: 10px;") Save
+  #newSFConnPanel.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type="button",data-dismiss="modal",aria-hidden="true") &times;
+          h4.modal-title SFConnection 
+            small New
+        .modal-body
+          form#newSFConn.form-horizontal(role="form",action="/sfconn",method="post")
+            .form-group
+              label.col-sm-3.control-label(for="inputEmail") E-mail 
+              .col-sm-8
+                input#inputEmail.form-control(name="username",type="email",placeholder="Username") 
+            .form-group
+              label.col-sm-3.control-label(for="connName") SFConn Name
+              .col-sm-8
+                input#connName.form-control(name="connName",type="text",placeholder="Connection Name")
+            .form-group
+              label.col-sm-3.control-label(for="inputPassword") Password 
+              .col-sm-8
+                input#inputPassword.form-control(name="password",type="password",placeholder="Password")
+            .form-group
+              label.col-sm-3.control-label(for="inputSecurToken") Secure Token 
+              .col-sm-8
+                input#inputSecurToken.form-control(name="secureToken",type="password",placeholder="Secure Token")
+            .form-group
+              label.col-sm-3.control-label(for="inputSelect") ENV 
+              .col-sm-8
+                select#inputSelect.form-control(name="endpoint")
+                  option.form-control(value="test.salesforce.com") sandbox
+                  option.form-control(value="login.salesforce.com") production
+            .form-group
+              .col-sm-8.col-sm-offset-3
+                .checkbox
+                  label 
+                    input#isStore(type="checkbox",name="isStore") 
+                    p
+                      |Remenber This Connection
+            .form-group
+              .validInfo.alert.alert-success.col-sm-8.col-sm-offset-3(style='display:none;').
+                  You org connects well.
+              .unValideInfo.alert.alert-danger.col-sm-8.col-sm-offset-3(style='display:none;').
+                  Can't connect to Salesforce.Please check your input infos.
+              .col-sm-offset-3.col-sm-8(style="text-align: right;")
+                button.connValidate.btn.btn-warning(type="button",style="margin-right: 10px;") Validate
+                button.btn.btn-primary(type="submit",form="newSFConn",style="margin-right: 10px;") Sign in

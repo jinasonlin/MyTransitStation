@@ -1,0 +1,13 @@
+
+body{
+	margin-top: 30px;
+}
+.badge-edit{
+	background-color:#5BC0DE;
+}
+.badge-signIn{
+	background-color:#428BCA;
+}
+.badge-del{
+	background-color:#F0AD4E;
+}

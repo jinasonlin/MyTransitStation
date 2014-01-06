@@ -1,0 +1,23 @@
+extends ../layouts/layout-default
+
+block scripts
+  script(type='text/javascript',src="/js/libs/jquery.js")
+  script(type='text/javascript',src="/js/libs/bootstrap.js")
+  script(type='text/javascript',src="/js/sfconn/main.js")
+
+block content
+  .container
+    .panel
+      .panel-heading #{title}
+      .panel-body
+        .row
+          .col-md-10
+            ol.breadcrumb
+              li
+                a(href="#") SFConnections
+              li.active #{connName}
+            .row
+              .col-md-2
+                p 
+                  |Changesets
+              .col-md-8
