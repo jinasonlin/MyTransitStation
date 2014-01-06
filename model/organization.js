@@ -5,7 +5,6 @@ var mongoose = require('mongoose')
   , ObjectId = Schema.ObjectId;
  
 var organizationSchema = new Schema({
-  id: ObjectId,
   name: String,
   description: String,
   defaultAdminUserId: {type: ObjectId, default: null},
