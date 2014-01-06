@@ -15,7 +15,8 @@
     "mongoose": ">= 2.6.5",
     "soap": "~0.3.1",
     "nforce": "~0.6.0",
-    "metaforce": "git://github.com/tstachl/metaforce.git#master"
+    "metaforce": "git://github.com/tstachl/metaforce.git#master",
+    "connect-mongo": "~0.4.0"
   },
   "engines": {
     "node": "0.10.x"
