@@ -1,0 +1,36 @@
+extends ../layouts/layout-default
+
+block stylesheet
+  link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
+
+block scripts
+  script(type='text/javascript',src="/js/sfconn/main.js")
+
+block content
+  .container
+    .panel
+      .panel-heading 
+        .col-md-12
+          h2.pull-left #{title} | #{sfconn.name}
+            small
+              |New Changeset
+          button.btn.btn-warning.btn-xs(style="margin-top: 30px;margin-left: 4px;",onclick="window.open('/sfconn/logout','_self');")
+            span.glyphicon.glyphicon-remove-sign(style="margin-right: 5px;")
+            |Log out
+      .panel-body(style="margin-top:50px;")
+        form.form-horizontal
+          .form-group
+            label.col-md-1.control-label Name
+            .col-md-3
+              input.form-control(name="changeSetName",type="text",placeholder="Changeset Name")
+          .form-group
+            label.col-md-1.control-label Files
+            .col-md-8
+              ul.list-unstyled
+                for meta in metas
+                  li 
+                    .checkbox
+                      button.btn.btn-default.btn-sm
+                      label
+                        input(type="checkbox")
+                        |#{meta.xmlName}

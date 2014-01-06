@@ -9,7 +9,7 @@ exports.login = function(req, res) {
   });
   global.client.login(function(err, response, lastRequest) {
     if (global.client.userId) {
-      res.redirect("/metadata/list");
+      res.redirect("/sfconn/list");
     } else {
       res.redirect("/?errMessage=Login failed, please check your username and password!");
     }

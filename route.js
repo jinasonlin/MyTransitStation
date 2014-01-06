@@ -1,7 +1,8 @@
 var authentication = require("./filter/authentication")
   , site = require('./controller/site')
   , user = require('./controller/user')
-  , metadata = require('./controller/metadata');
+  , metadata = require('./controller/metadata')
+  , sfconnManager = require("./controller/sfconnManager");
 
 module.exports = function(app) {
   app.get("/", authentication.redirectIfLoggedIn, site.index);
@@ -12,4 +13,20 @@ module.exports = function(app) {
 
   app.get("/organization/new", user.initOrganizationForm);
   app.post("/organization", user.saveOrganization);
+
+  //sfconn manage routes
+  app.get("/sfconn",sfconnManager.listSFConn);
+  app.post("/sfconn",sfconnManager.addSFConn);
+  app.post("/sfconn/validate",sfconnManager.validateSFConn);
+  app.get("/sfconn/logout",sfconnManager.logoutSFConn);
+  app.get("/sfconn/:sfconnId",sfconnManager.listSFConnInfo);
+  app.put("/sfconn/:sfconnId",sfconnManager.updateSFConn);
+  app.delete("/sfconn/:sfconnId",sfconnManager.deleteSFConn);
+  
+  app.all("/sfconn/:sfconnId/*",authentication.checkSFConnLoggedin);
+  app.get("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetInit);
+  app.post("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetNew);
+  app.get("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetInfo);
+  app.put("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetEdit);
+  app.delete("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetDelete);
 }

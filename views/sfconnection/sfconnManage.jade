@@ -1,8 +1,8 @@
 extends ../layouts/layout-default
 
+block stylesheet
+  link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
 block scripts
-  script(type='text/javascript',src="/js/libs/jquery.js")
-  script(type='text/javascript',src="/js/libs/bootstrap.js")
   script(type='text/javascript',src="/js/sfconn/main.js")
 
 block content
@@ -12,7 +12,7 @@ block content
     .page-header
       h1 
         span Salesforce Connections
-        button.btn.btn-primary.btn-sm(data-toggle="modal",data-target="#newSFConnPanel",style="margin-left:10px;")
+        button.btn.btn-info.btn-xs(data-toggle="modal",data-target="#newSFConnPanel",style="margin-left:10px;")
           span.glyphicon.glyphicon-plus-sign
           span(style="margin-left:6px;")
             |New connection
@@ -23,9 +23,9 @@ block content
           ul.nav.nav-stacked
             li.active
               a(href="#")
-                |#{oriSFConn.name} : #{oriSFConn.username}
-                span#sfconnSignIn.badge.pull-right.badge-signIn
-                  |Sign in
+                |#{oriSFConn.name}
+                span.badge.pull-right.badge-signIn.sfchangeSet(style="margin-left:2px;")
+                  |Changesets
                 span.badge.badge-edit.pull-right(data-toggle="modal",data-target='#'+sfconnId,style="margin-left:2px;margin-right:2px;")
                   |Edit
                 span.badge.badge-del.pull-right.sfconnDelete(style="margin-right:2px;")
@@ -116,4 +116,4 @@ block content
                   Can't connect to Salesforce.Please check your input infos.
               .col-sm-offset-3.col-sm-8(style="text-align: right;")
                 button.connValidate.btn.btn-warning(type="button",style="margin-right: 10px;") Validate
-                button.btn.btn-primary(type="submit",form="newSFConn",style="margin-right: 10px;") Sign in
+                button.btn.btn-primary(type="submit",form="newSFConn",style="margin-right: 10px;") Save

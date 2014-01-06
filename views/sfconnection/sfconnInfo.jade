@@ -1,23 +1,27 @@
 extends ../layouts/layout-default
 
+block stylesheet
+  link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
+
 block scripts
-  script(type='text/javascript',src="/js/libs/jquery.js")
-  script(type='text/javascript',src="/js/libs/bootstrap.js")
   script(type='text/javascript',src="/js/sfconn/main.js")
 
 block content
   .container
     .panel
-      .panel-heading #{title}
+      .panel-heading 
+        .col-md-10
+          h2.pull-left #{title} | #{sfconn.name}
+          button.btn.btn-warning.btn-xs(style="margin-top: 30px;margin-left: 4px;",onclick="window.open('/sfconn/logout','_self');")
+            span.glyphicon.glyphicon-remove-sign(style="margin-right: 5px;")
+            |Log out
       .panel-body
         .row
           .col-md-10
-            ol.breadcrumb
-              li
-                a(href="#") SFConnections
-              li.active #{connName}
             .row
-              .col-md-2
-                p 
-                  |Changesets
+              .col-md-4
+                h4.pull-left Changesets
+                button.btn.btn-info.btn-xs(style="margin-top: 9px;margin-left: 6px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets','_self');")
+                  span.glyphicon.glyphicon-plus 
+                  |New
               .col-md-8

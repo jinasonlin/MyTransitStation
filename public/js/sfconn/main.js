@@ -4,17 +4,16 @@
 var $=jQuery.noConflict();
 $(document).ready(function(){
 	$('.sfconnEditForm').each(function(){
+		var sfconnId=$(this).parent().parent().parent().parent().attr('id');
+		var sfconn={};
+		sfconn.name=$('#'+sfconnId).find("input[name='connName']").val();
+		sfconn.username=$('#'+sfconnId).find("input[name='username']").val();
+		sfconn.password=$('#'+sfconnId).find("input[name='password']").val();
+		sfconn.secureToken=$('#'+sfconnId).find("input[name='secureToken']").val();
+		sfconn.conn_env=$('#'+sfconnId).find("select[name='endpoint']").val();
 		$(this).find('.connValidate').bind('click',function(){
-			var sfconnId=$(this).parent().parent().parent().parent().parent().parent().parent().attr('id');
-			var sfconn={};
-			sfconn.name=$('#'+sfconnId).find("input[name='connName']").val();
-			sfconn.username=$('#'+sfconnId).find("input[name='username']").val();
-			sfconn.password=$('#'+sfconnId).find("input[name='password']").val();
-			sfconn.secureToken=$('#'+sfconnId).find("input[name='secureToken']").val();
-			sfconn.conn_env=$('#'+sfconnId).find("select[name='endpoint']").val();
 			$.post('/sfconn/validate',{
-				sfconn:sfconn,
-				_method:'put'
+				sfconn:sfconn
 			}).done(function(data){
 				if('validate'==data){
 					$('#'+sfconnId).find('.validInfo').css('display','block');
@@ -25,14 +24,26 @@ $(document).ready(function(){
 				}
 			});
 		});
+		$("#"+sfconnId).prev().find('.sfchangeSet').bind('click',function(){
+			$.post('/sfconn/validate',{
+				sfconn:sfconn
+			}).done(function(data){
+				console.log(data);
+				if('validate'==data){
+					window.open("/sfconn/"+sfconnId,"_self");
+				}else{
+					$('#'+sfconnId).find('.unValideInfo').css('display','block');
+					$("#"+sfconnId).modal('show');
+				}
+			});
+		});
 	});
 
 	$('span.sfconnDelete').each(function(){
 		$(this).bind('click',function(){
 			var sfconnId=$(this).parent().parent().parent().parent().next().attr('id');
-			console.log(sfconnId);
 			if(sfconnId){
-				$.post('/sfconn/'+sfconnId,{_method:'delete'});
+				$.post('/sfconn/'+sfconnId,{_method:'delete'},function(){});
 			}
 		});
 	});
