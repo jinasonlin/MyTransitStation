@@ -21,11 +21,11 @@ module.exports = function(app) {
   app.put("/sfconn/:sfconnId",sfconnManager.updateSFConn);
   app.delete("/sfconn/:sfconnId",sfconnManager.deleteSFConn);
   
+  app.post("/sfconn/:sfconnId/syncFile",sfconnManager.syncFile);
   app.all("/sfconn/:sfconnId/*",authentication.checkSFConnLoggedin);
   app.get("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetInit);
-  app.post("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetNew);
+  app.post("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetSave);
   app.get("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetInfo);
-  app.put("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetEdit);
   app.delete("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetDelete);
 
   /*

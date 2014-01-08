@@ -28,7 +28,6 @@ $(document).ready(function(){
 			$.post('/sfconn/validate',{
 				sfconn:sfconn
 			}).done(function(data){
-				console.log(data);
 				if('validate'==data){
 					window.open("/sfconn/"+sfconnId,"_self");
 				}else{
@@ -37,16 +36,28 @@ $(document).ready(function(){
 				}
 			});
 		});
-	});
-
-	$('span.sfconnDelete').each(function(){
-		$(this).bind('click',function(){
-			var sfconnId=$(this).parent().parent().parent().parent().next().attr('id');
-			if(sfconnId){
-				$.post('/sfconn/'+sfconnId,{_method:'delete'},function(){});
-			}
+		$("#"+sfconnId).prev().find('.sffileSync').bind('click',function(){
+			$.post('/sfconn/validate',{
+				sfconn:sfconn
+			}).done(function(data){
+				if('validate'==data){
+					$.post('/sfconn/'+sfconnId+'/syncFile');
+				}else{
+					$('#'+sfconnId).find('.unValideInfo').css('display','block');
+					$("#"+sfconnId).modal('show');
+				}
+			});
+		});
+		$("#"+sfconnId).prev().find('.sfconnDelete').bind('click',function(){
+			$.post('/sfconn/'+sfconnId,{_method:'delete'}).done(function(data){
+				if('done' == data){
+					location.reload(true);
+				}
+			});
 		});
 	});
+
+	
 
 	$('#newSFConn .connValidate').bind('click',function(){
 		var newSFConn={};

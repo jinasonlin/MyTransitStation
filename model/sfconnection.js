@@ -5,14 +5,17 @@ var mongoose = require('mongoose')
   , ObjectId = Schema.ObjectId;
  
 var SFConnection = new Schema({
-  name: String,
-  username : String,
-  password : String,
-  secureToken : String,
+  name: {type :String,default : ''},
+  username : {type :String,default : ''},
+  password : {type :String,default : ''},
+  secureToken : {type :String,default : ''},
   conn_env : {type:String,default:'test.salesforce.com'},
-  description: String,
+  description: {type :String,default : ''},
   createdDate: {type: Date, default: Date.now},
-  createdBy: {type: ObjectId, default: null}
+  createdBy: {type: ObjectId, default: null},
+  fileInfo : {type : Array, default : []},
+  syncFileStatus : {type : String, default : 'none'},
+  lastFileSyncDate : {type : Date , default : null}
 });
  
 module.exports = mongoose.model('SFConnection', SFConnection);

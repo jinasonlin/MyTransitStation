@@ -7,10 +7,12 @@ exports.showloginForm = function(req, res) {
 };
 
 exports.login = function(req, res) {
+  console.log(req.body);
   User.findOne({
     username: req.body.username,
     password: req.body.password
   }, function (err, user) {
+    if(err) console.log(err);
     console.log("login with " + req.body.username + ": " + user);
     if (user != null) {
       // found valid user

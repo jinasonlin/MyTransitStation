@@ -4,33 +4,56 @@ block stylesheet
   link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
 
 block scripts
-  script(type='text/javascript',src="/js/sfconn/main.js")
+  script(type='text/javascript',src="/js/sfconn/changeSet.js")
 
 block content
   .container
     .panel
       .panel-heading 
         .col-md-12
-          h2.pull-left #{title} | #{sfconn.name}
-            small
-              |New Changeset
+          h2.pull-left #{title}
+            small (#{_sfconn.username})
           button.btn.btn-warning.btn-xs(style="margin-top: 30px;margin-left: 4px;",onclick="window.open('/sfconn/logout','_self');")
             span.glyphicon.glyphicon-remove-sign(style="margin-right: 5px;")
             |Log out
       .panel-body(style="margin-top:50px;")
+        #errMessage.alert.alert-danger(style="display:none;")
         form.form-horizontal
+          input#sfconnId(type="hidden",value="#{_sfconn._id}")
           .form-group
             label.col-md-1.control-label Name
             .col-md-3
-              input.form-control(name="changeSetName",type="text",placeholder="Changeset Name")
+              if changeSet
+                input#changeSetName.form-control(disabled=true,name="changeSetName",type="text",placeholder="Changeset Name",value="#{changeSet.name}")
+              else
+                input#changeSetName.form-control(name="changeSetName",type="text",placeholder="Changeset Name")
+            .col-md-1
+              button#newCSSaveBtn.btn.btn-info.btn-md(type="button") Save
+            #warning.col-md-4(style="display:none;height:34px;")
+              .alert.alert-warning.form-control(style="padding-top:6px;") 
           .form-group
             label.col-md-1.control-label Files
             .col-md-8
+              if message
+                .alert.alert-info
+                  |#{message}
               ul.list-unstyled
-                for meta in metas
-                  li 
+                for metaData in _sfconn.fileInfo
+                  li(ref="#{metaData.metaObject.xmlName}") 
                     .checkbox
-                      button.btn.btn-default.btn-sm
                       label
-                        input(type="checkbox")
-                        |#{meta.xmlName}
+                        input(type="checkbox",mode="metaObjectAllCheck",name="metaObject")
+                        |#{metaData.metaObject.xmlName}
+                      button.controlBtn.controlFold.btn.btn-xs(type="button",style="margin-left: 6px;")
+                        span.glyphicon.glyphicon-plus-sign
+                  for childFile in metaData.childFiles
+                    li(ref="#{metaData.metaObject.xmlName}",mode="metaObjectChild",style="display:none;margin-left: 20px;")
+                      .checkbox
+                        label
+                          if childFile.isChecked
+                            input(checked=true,type="checkbox",ref="#{metaData.metaObject.xmlName}",mode="metaFile",name="metaFile")
+                          else
+                            input(type="checkbox",ref="#{metaData.metaObject.xmlName}",mode="metaFile",name="metaFile")
+                          em
+                            |#{childFile.fileName}
+

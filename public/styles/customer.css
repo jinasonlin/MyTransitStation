@@ -11,3 +11,13 @@ body{
 .badge-del{
 	background-color:#F0AD4E;
 }
+.panel-body hr{
+	margin-top: 0px;
+	margin-bottom: 4px;
+}
+.panel-body h4{
+	margin-left: 20px;
+}
+.panel-body .block-body{
+	margin-left: 30px;
+}
