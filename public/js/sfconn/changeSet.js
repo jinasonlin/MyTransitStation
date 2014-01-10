@@ -39,10 +39,14 @@ $(document).ready(function(){
 		if($("input[mode='metaFile']:checked").length==0){
 			$("#warning").children().text("No file checked.");
 			$("#warning").show();
-			$("#warning").fadeOut(4000);
+			$("#warning").fadeOut(3000);
 		}else{
 			$("input[mode='metaFile']:checked").each(function(){
-				selectFiles.push($(this).next().text()); 
+				var metaName = $(this).parent().parent().parent().attr('ref');
+				selectFiles.push({
+					fileName : $(this).next().text(),
+					metaName : metaName
+				}); 
 			});
 		}
 		if(csName =='' || csName == null){

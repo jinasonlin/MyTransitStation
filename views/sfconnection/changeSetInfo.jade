@@ -4,10 +4,13 @@ block stylesheet
   link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
 
 block scripts
+  script(type='text/javascript',src="/js/libs/spin.js")
+  script(type='text/javascript',src="/js/libs/spin.jquery.js")
   script(type='text/javascript',src="/js/sfconn/changeSetInfo.js")
 
 block content
   input#sfconnId(type="hidden",value="#{sfconn._id}")
+  input#csId(type="hidden",value="#{changeSet._id}")
   .container
     .panel
       .panel-heading 
@@ -20,13 +23,22 @@ block content
       .panel-body
         .row
           .row 
-            .col-md-3
+            .col-md-4
               h4 Files
-                button.btn.btn-xs.btn-info(type="button",style="margin-left:4px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
+                if changeSet.archiveStatus=='block'
+                  button.btn.btn-xs.btn-warning(type="button",style="margin-left:4px;",disabled=true) Edit
+                    em (Archived . You can't edit this ChangeSet files.)
+                else
+                  button.btn.btn-xs.btn-info(type="button",style="margin-left:4px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
             .col-md-7.pull-right(style="padding-top: 3px;text-align:center;")
-              button.btn.btn-sm.btn-info(type="button",style="margin-left:4px;") Archive
-              button.btn.btn-sm.btn-info(type="button",style="margin-left:4px;") Validate
-              button.btn.btn-sm.btn-info(type="button",style="margin-left:4px;") Deploy
+              button.btn.btn-sm.btn-info.archive(type="button",style="margin-left:4px;") Archive
+              if changeSet.validateStatus!='inProgress'&&changeSet.deployStatus!='inProgress'
+                button.btn.btn-sm.btn-info.validate(type="button",style="margin-left:4px;") Validate
+                button.btn.btn-sm.btn-info.deploy(type="button",style="margin-left:4px;") Deploy
+              else
+                button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Validate
+                button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Deploy
+          .row.alert(style="display:none;")
           hr
           .row.block-body
             ul.list-unstyled
@@ -44,8 +56,19 @@ block content
               h4 Archives
           hr
           .row.block-body
-            if changeSet.archives
-              .col-md-7 Data.
+            if archives
+              .col-md-7 
+                ul.list-unstyled
+                  for archive in archives
+                    li(id="#{archive._id}",style="margin:2px;") 
+                      span #{archive.name}
+                      if archive.validateStatus!='inProgress'&&archive.deployStatus!='inProgress'
+                        button.btn.btn-xs.btn-info.bakvalidate(style="margin-left: 6px;") Validate
+                        button.btn.btn-xs.btn-info.bakdeploy(style="margin-left: 6px;") Deploy
+                      else
+                        button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Validate
+                        button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Deploy
+                      
             else 
               .col-md-7 No Data.
         .row 
@@ -54,7 +77,7 @@ block content
               h4 Validates
           hr
           .row.block-body
-            if changeSet.validates
+            if validates
               .col-md-7 Data.
             else 
               .col-md-7 No Data.
@@ -64,7 +87,7 @@ block content
               h4 Deploys
           hr
           .row.block-body
-            if changeSet.deploys
+            if deploys
               .col-md-7 Data.
             else 
               .col-md-7 No Data.

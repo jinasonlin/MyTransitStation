@@ -3,7 +3,9 @@ var authentication = require("./filter/user-authentication")
   , user = require('./controller/user')
   , metadata = require('./controller/metadata')
   , sfconnManager = require("./controller/sfconnManager")
-  , admin = require('./controller/admin');
+  , changeSetManager = require("./controller/changeSetManager")
+  , admin = require('./controller/admin')
+  , test = require('./controller/test');
 
 module.exports = function(app) {
   //app.get("/", authentication.redirectIfLoggedIn, site.index);
@@ -27,6 +29,12 @@ module.exports = function(app) {
   app.post("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetSave);
   app.get("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetInfo);
   app.delete("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetDelete);
+
+  app.post("/changeSets/:changeSetId/archives",changeSetManager.addArchive);
+  app.post("/changeSets/:changeSetId/validate",changeSetManager.addValidation);
+  app.post("/changeSets/:changeSetId/deploy",changeSetManager.addDeployment);
+
+  app.get("/test",test.testArchive);
 
   /*
   app.get("/admin", user.showAdminLoginForm);

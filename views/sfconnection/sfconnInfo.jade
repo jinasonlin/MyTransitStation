@@ -4,6 +4,8 @@ block stylesheet
   link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
 
 block scripts
+  script(type='text/javascript',src="/js/libs/spin.js")
+  script(type='text/javascript',src="/js/libs/spin.jquery.js")
   script(type='text/javascript',src="/js/sfconn/sfconnInfo.js")
 
 block content
@@ -24,6 +26,7 @@ block content
             button.btn.btn-info.btn-xs(style="margin-top: 9px;margin-left: 6px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets','_self');")
               span.glyphicon.glyphicon-plus 
               |New
+        .row.alert(style="display:none;")
         .row
           table.table.table-hover.table-bordered
             thead
@@ -40,7 +43,13 @@ block content
                   td #{user.username}
                   td #{changeSet.createdDate}
                   td
-                    button.btn.btn-xs.btn-warning(type="button") Delete
-                    button.btn.btn-xs.btn-info(style="margin-left:6px;",type="button",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
-                    button.btn.btn-xs.btn-info(style="margin-left:6px;",type="button") Archive
-                    button.btn.btn-xs.btn-info(style="margin-left:6px;",type="button") Deploy
+                    button.btn.btn-xs.btn-warning.delete(type="button") Delete
+                    if changeSet.archiveStatus=='block'
+                      button.btn.btn-xs.btn-warning(style="margin-left:6px;",type="button",title="Archived . You can't edit this ChangeSet files.") Edit
+                    else
+                      button.btn.btn-xs.btn-info(style="margin-left:6px;",type="button",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
+                    button.btn.btn-xs.btn-info.archive(style="margin-left:6px;",type="button") Archive
+                    if changeSet.deployStatus=='inProgress'
+                      button.btn.btn-xs.btn-warning.deploy(style="margin-left:6px;",type="button",title="Deploy is processing . You cant't deploy this ChangeSet at the same time.") Deploy
+                    else
+                      button.btn.btn-xs.btn-info.deploy(style="margin-left:6px;",type="button") Deploy

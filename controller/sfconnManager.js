@@ -1,13 +1,14 @@
 var nodeforce = require("../lib/nodeforce"),
  	SFConnection = require("../model/sfconnection"),
  	ChangeSet = require("../model/changeset"),
+ 	Archive = require("../model/archive"),
  	async = require("async"),
  	Moment = require("moment");
 
  	Moment.lang('en_gb');
 
 exports.listSFConn = function(req,res){
-	SFConnection.find({createdBy: req.session.user._id},
+	SFConnection.find({createdBy: req.session.user._id,sfconntype : 'normal'},
 		'-fileInfo', 
 		{sort : {name : 'asc'}},
 		function(err,SFConnections){
@@ -17,15 +18,16 @@ exports.listSFConn = function(req,res){
 				title : 'SFConnection',
 				SFConnections:[]
 			});
-		}else res.render('sfconnection/sfconnManage',{
-			SFConnections:SFConnections,
-			title : 'SFConnection'
-		});
+		}else {
+			res.render('sfconnection/sfconnManage',{
+				SFConnections:SFConnections,
+				title : 'SFConnection'
+			});
+		}
 	})
 };
 
 exports.addSFConn = function(req,res){
-	console.log(req.body);
 	var newSFConn={
 		name : req.body.connName,
 		username : '',
@@ -210,23 +212,23 @@ exports.changeSetSave = function(req,res){
 	};
 	if(selectFiles && selectFiles.length>0){
 		async.eachSeries(selectFiles,function(fileInfo,callback){
-			var fileInfos = fileInfo.split('/');
+			var fileInfos = fileInfo.fileName.split('/');
 			if(fileInfos && fileInfos.length >= 2){
 				var dirName = fileInfos[0];
-				var packName = getPackNameFromDirName(dirName);
+				var packName = fileInfo.metaName;
 				var dirExists = false;
 				for(var i=0;i<cs.files.length;i++){
 					var pack = cs.files[i];
-					if(dirName == pack.directoryName){
+					if(packName == pack.packName){
 						dirExists = true;
-						cs.files[i].files.push(fileInfo);
+						cs.files[i].files.push(fileInfo.fileName);
 						break; 
 					}
 				}
 				if(!dirExists){
 					var newData = {
 						directoryName : dirName,
-						files : [fileInfo],
+						files : [fileInfo.fileName],
 						packName : packName
 					}
 					cs.files.push(newData);
@@ -278,10 +280,13 @@ exports.changeSetInfo = function(req,res){
 	ChangeSet.findById(req.params.changeSetId,function(err,docs){
 		if(err)res.redirect('/sfconn/'+req.params.sfconnId);
 		else{
-			res.render('sfconnection/changeSetInfo',{
-				title : 'ChangeSet | '+docs.name,
-				changeSet :  docs,
-				sfconn : global.sfclient
+			Archive.find({changeSetId:req.params.changeSetId},'',{sort:{createdDate:'desc'}},function(err,archives){
+				res.render('sfconnection/changeSetInfo',{
+					title : 'ChangeSet | '+docs.name,
+					changeSet :  docs,
+					sfconn : global.sfclient,
+					archives : archives
+				});
 			});
 		}
 	});
@@ -305,63 +310,60 @@ function syncSFConnFile(sfconnId){
 			});
 	  		sfclient.login(function(err, response, lastRequest) {
 	    		if (sfclient.userId) {
-	    			docs.update({
-	    				syncFileStatus : 'InProgress'
-	    			});
-			      	sfclient.describe(function(err,response,request){
-						var allData=[];
-						if(response.result && response.result.metadataObjects){
-							var metadataObjects = response.result.metadataObjects;
-							metadataObjects.sort();
-							async.each(metadataObjects,function(item,callback){
-								var metaData ={};
-								metaData.metaObject = item;
-								sfclient.list({
-									queries:[{
-										folder:item.directoryName,
-										type:item.xmlName
-									}],
-									asOfVersion:'29.0'
-								},function(err,response,request){
-									callback(err,response);
-									if(!err){
-										if(response.result && response.result.length){
-											metaData.childFiles = response.result;
-											allData.push(metaData);
+	    			if('InProgress' != docs.syncFileStatus){
+	    				docs.update({
+		    				syncFileStatus : 'InProgress'
+		    			});
+				      	sfclient.describe(function(err,response,request){
+							var allData=[];
+							if(response.result && response.result.metadataObjects){
+								var metadataObjects = response.result.metadataObjects;
+								metadataObjects.sort();
+								async.each(metadataObjects,function(item,callback){
+									var metaData ={};
+									metaData.metaObject = item;
+									sfclient.list({
+										queries:[{
+											folder:item.directoryName,
+											type:item.xmlName
+										}],
+										asOfVersion:'29.0'
+									},function(err,response,request){
+										callback(err,response);
+										if(!err){
+											if(response.result && response.result.length){
+												metaData.childFiles = response.result;
+												allData.push(metaData);
+											}
 										}
+									});
+								},function(err){
+									if(err) {
+										console.log(err);
+										docs.update({
+											syncFileStatus : 'fail',
+											lastFileSyncDate : new Date()
+										});
+									} else {
+										docs.update({
+											fileInfo : allData,
+											syncFileStatus : 'done',
+											lastFileSyncDate : new Date()
+										},function(err,data){
+											if(err)console.log('update fileinfo of sfconn(id : '+docs._id+') err. errMessage : '+err);
+											else console.log('update fileinfo of sfconn(id : '+docs._id+') complete.');
+										});
 									}
 								});
-							},function(err){
-								if(err) console.log(err);
-								else {
-									docs.update({
-										fileInfo : allData,
-										syncFileStatus : 'done',
-										lastFileSyncDate : new Date()
-									},function(err,data){
-										if(err)console.log('update fileinfo of sfconn(id : '+docs._id+') err. errMessage : '+err);
-										else console.log('update fileinfo of sfconn(id : '+docs._id+') complete.');
-									});
-								}
-							});
-						}
-					});
+							}
+						});
+	    			}
 	    		}else{
 	    			console.log('failed to log in sfdc with sfconn(id : '+sfconnId+')');
 	    		} 
 	  		});
 		}
 	});
-}
-
-function getPackNameFromDirName(dirName){
-	if(dirName.lastIndexOf('s') == (dirName.length-1)){
-		dirName = dirName.substring(0,dirName.length-1);
-	}
-	var headChar = dirName.charAt(0);
-	headChar = headChar.toUpperCase();
-	dirName = headChar + dirName.substring(1);
-	return dirName;
 }
 
 function fixCSFileStr(str){

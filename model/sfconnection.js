@@ -15,7 +15,9 @@ var SFConnection = new Schema({
   createdBy: {type: ObjectId, default: null},
   fileInfo : {type : Array, default : []},
   syncFileStatus : {type : String, default : 'none'},
-  lastFileSyncDate : {type : Date , default : null}
+  lastFileSyncDate : {type : Date , default : null},
+  remainSFConn : {type:Boolean,default:true},
+  sfconntype : {type:String,default:'normal'}
 });
  
 module.exports = mongoose.model('SFConnection', SFConnection);
