@@ -34,7 +34,7 @@ module.exports = function(app) {
   app.post("/changeSets/:changeSetId/validate",changeSetManager.addValidation);
   app.post("/changeSets/:changeSetId/deploy",changeSetManager.addDeployment);
 
-  app.get("/test",test.testArchive);
+  app.get("/test",test.testDeploy);
 
   /*
   app.get("/admin", user.showAdminLoginForm);

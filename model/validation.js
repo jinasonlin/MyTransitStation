@@ -9,8 +9,7 @@ var Validation = new Schema({
   archiveId: {type: ObjectId, default: null},
   status : {type : String , default : 'new'},
   targetSFConnId : {type: ObjectId, default: null},
-  isTargetSFConnSave : {type : Boolean,default : false},
-  remainValidation : {type : Boolean,default : true}
+  validateResult : {type : Array , default:[]}
 });
  
 module.exports = mongoose.model('Validation', Validation);

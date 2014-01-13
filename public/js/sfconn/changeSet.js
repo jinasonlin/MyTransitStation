@@ -54,7 +54,12 @@ $(document).ready(function(){
 			$("#warning").show();
 			$("#warning").fadeOut(3000);
 		}
-		if(selectFiles && selectFiles.length>0 && csName!='' && csName != null){
+		if(selectFiles.length > 5000){
+			$("#warning").text("Too many files checked( >5000 ).");
+			$("#warning").show();
+			$("#warning").fadeOut(3000);
+		}
+		if(selectFiles && selectFiles.length>0 && selectFiles.length <= 5000 && csName!='' && csName != null){
 			var req_url = "/sfconn/"+$("#sfconnId").val()+"/changeSets";
 			if(location.search.indexOf('csId')>-1){
 				req_url += location.search;

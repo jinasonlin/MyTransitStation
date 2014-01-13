@@ -1,6 +1,6 @@
 var aws = require('aws-sdk'),
 	changesetservice = require('./changesetservice'),
-	Buffer = require('buffer').Buffer
+	Buffer = require('buffer').Buffer,
 	fs = require('fs'),
 	CommonService = require('./commonservice');
 
@@ -58,8 +58,10 @@ exports.downloadData = function(s3key,callback){
 	S3.headBucket({
 		Bucket : 'migrationtool'
 	},function(err,migrationtool){
-		if(err)console.log(err);
-		else{
+		if(err){
+			console.log(err);
+			callback(err);
+		}else{
 			if(migrationtool){
 				console.log('migrationtool exist');
 				var opts = {

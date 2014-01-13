@@ -2,10 +2,13 @@ var nodeforce = require("../lib/nodeforce"),
  	SFConnection = require("../model/sfconnection"),
  	ChangeSet = require("../model/changeset"),
  	Archive = require("../model/archive"),
+ 	Validation = require("../model/validation"),
+	Deployment = require("../model/deployment"),
  	async = require("async"),
  	Moment = require("moment");
 
  	Moment.lang('en_gb');
+ 	var datefmt = 'YYYY-MM-DD HH:mm:ss';
 
 exports.listSFConn = function(req,res){
 	SFConnection.find({createdBy: req.session.user._id,sfconntype : 'normal'},
@@ -30,24 +33,68 @@ exports.listSFConn = function(req,res){
 exports.addSFConn = function(req,res){
 	var newSFConn={
 		name : req.body.connName,
-		username : '',
-		password : '',
-		secureToken : '',
-		endpoint : '',
+		username : req.body.username,
+		password : req.body.password,
+		secureToken : req.body.secureToken,
+		conn_env : req.body.endpoint,
 		createdBy : req.session.user._id
 	};
-	var isStore=req.body.isStore;
-	if('on' == isStore){
-		newSFConn.username = req.body.username;
-		newSFConn.password = req.body.password;
-		newSFConn.secureToken = req.body.secureToken;
-		newSFConn.conn_env = req.body.endpoint;
+	var isStore = req.body.isStore;
+	var csId = req.body.csId;
+	var triggel_name = req.body.triggleName;
+	console.log(req.body);
+	if(csId && triggel_name){
+		if(!isStore){
+			newSFConn.sfconntype = 'temp';
+		}
 	}
 	new SFConnection(newSFConn).save(function(err,docs){
 		if(err) res.send({errMessage : 'Save Error'});
 		else {
-			res.redirect('/sfconn');
-			syncSFConnFile(docs._id);
+			if(docs.sfconntype == 'normal'){
+				syncSFConnFile(docs._id);
+			}
+			if(csId){
+				ChangeSet.findById(csId,function(err,changeSet){
+					if(changeSet){
+						if('none' == changeSet.validateStatus &&'none' == changeSet.deployStatus){
+							if('validation' == triggel_name){
+								var newValidation = {};
+									newValidation.name = Moment(new Date).format(datefmt);
+									newValidation.changeSetId = csId;
+									newValidation.targetSFConnId = docs._id;
+									new Validation(newValidation).save(function(err){
+										if(!err){
+											ChangeSet.findByIdAndUpdate(csId,{
+												validateStatus : 'block'
+											},function(err){
+												if(err)console.log(err);
+											});
+										}
+									});
+								}
+							}
+							if('deployment' == triggel_name){
+								var newDeployment = {};
+								newDeployment.name = Moment(new Date).format(datefmt);
+								newDeployment.changeSetId = csId;
+								newDeployment.targetSFConnId = docs._id;
+								new Deployment(newDeployment).save(function(err){
+									if(!err){
+										ChangeSet.findByIdAndUpdate(csId,{
+											deployStatus : 'block'
+										},function(err){
+											if(err)console.log(err);
+										});
+									}
+								});
+							}
+						} 
+					res.redirect('/sfconn/'+global.sfconn._id+'/changeSets/'+csId);
+				});
+			}else{
+				res.redirect('/sfconn');
+			}
 		}
 	});
 };
@@ -143,31 +190,30 @@ exports.changeSetInit = function(req,res){
 				if(csId){
 					ChangeSet.findById(csId,function(err,changeSet){
 						var csFileStr = '';
+						var csFileStrLength = 0;
+						var checkedFileLength = 0;
 						async.series([function(callback){
-							var result = [];
 							for(var k=0;k<changeSet.files.length;k++){
 								for(var x=0;x<changeSet.files[k].files.length;x++){
-									result.push(changeSet.files[k].files[x]);
+									csFileStr += ('$'+changeSet.files[k].files[x]+'$');
 								}
 							}
-							csFileStr = result.join(',');
-							csFileStr = fixCSFileStr(csFileStr);
+							csFileStrLength = csFileStr.length;
 							callback(null,'getChangeSetAllFiles done');
 						},function(callback){
 							for(var i=0;i<data.fileInfo.length;i++){
 								var metaData=data.fileInfo[i];
 								for(var j=0;j<metaData.childFiles.length;j++){
 									var file = metaData.childFiles[j];
-									if(csFileStr.indexOf(","+file.fileName+",")>-1){
+									if(csFileStr.indexOf("$"+file.fileName+"$")>-1){
 										file.isChecked = true;
-										csFileStr = csFileStr.split(","+file.fileName+",").join(',');
-										csFileStr = fixCSFileStr(csFileStr);
+										checkedFileLength += file.fileName.length + 2;
 									}
-									if(csFileStr.length<=2){
+									if(csFileStrLength == checkedFileLength){
 										break;
 									}
 								}
-								if(csFileStr.length<=2){
+								if(csFileStrLength == checkedFileLength){
 									break;
 								}
 							}
@@ -208,7 +254,7 @@ exports.changeSetSave = function(req,res){
 		files : [],
 		sfconnId : req.params.sfconnId,
 		createdBy : req.session.user._id,
-		historyLog : 'Created by '+req.session.user.username+ ' at '+Moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+		historyLog : 'Created by '+req.session.user.username+ ' at '+Moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
 	};
 	if(selectFiles && selectFiles.length>0){
 		async.eachSeries(selectFiles,function(fileInfo,callback){
@@ -240,18 +286,25 @@ exports.changeSetSave = function(req,res){
 				ChangeSet.findById(csId,function(err,changeSet){
 					if(err)res.send({message : err});
 					else{
-						ChangeSet.findByIdAndUpdate(csId,{
-							$set : {
-								files : cs.files,
-								historyLog : 'Update by '+req.session.user.username+ ' at '+Moment(new Date()).format('YYYY-MM-DD HH:mm:ss')+' \n '+changeSet.historyLog
-							}
-						},function(err,changeSet){
-							if(err)res.send({message : err});
-							else res.send({
-								message : 'done',
+						if(changeSet.archiveStatus == 'block'){
+							res.send({
+								message : 'ChangeSet blocked with archive action.',
 								csId : csId
 							});
-						});
+						}else{
+							ChangeSet.findByIdAndUpdate(csId,{
+								$set : {
+									files : cs.files,
+									historyLog : 'Update by '+req.session.user.username+ ' at '+Moment(new Date()).format('YYYY-MM-DD HH:mm:ss')+' \n '+changeSet.historyLog
+								}
+							},function(err,changeSet){
+								if(err)res.send({message : err});
+								else res.send({
+									message : 'done',
+									csId : csId
+								});
+							});
+						}
 					}
 				});
 			}else{
@@ -280,14 +333,34 @@ exports.changeSetInfo = function(req,res){
 	ChangeSet.findById(req.params.changeSetId,function(err,docs){
 		if(err)res.redirect('/sfconn/'+req.params.sfconnId);
 		else{
-			Archive.find({changeSetId:req.params.changeSetId},'',{sort:{createdDate:'desc'}},function(err,archives){
-				res.render('sfconnection/changeSetInfo',{
-					title : 'ChangeSet | '+docs.name,
-					changeSet :  docs,
-					sfconn : global.sfclient,
-					archives : archives
+			if(docs){
+				async.parallel([function(callback){
+					Archive.find({changeSetId:req.params.changeSetId},'',{sort:{createdDate:'desc'}},function(err,archives){
+						callback(null,archives||[]);
+					});
+				},function(callback){
+					Validation.find({changeSetId:req.params.changeSetId},'',{sort:{createdDate:'desc'}},function(err,validations){
+						callback(null,validations||[]);
+					});
+				},function(callback){
+					Deployment.find({changeSetId:req.params.changeSetId},'',{sort:{createdDate:'desc'}},function(err,deployments){
+						callback(null,deployments||[]);
+					});
+				}],function(err,results){
+					res.render('sfconnection/changeSetInfo',{
+						title : 'ChangeSet | '+docs.name,
+						changeSet :  docs,
+						sfconn : global.sfclient,
+						archives : results[0],
+						validates : results[1],
+						deploys : results[2] 
+					});
 				});
-			});
+			}else{
+				res.render('404',{
+					title : '404',
+				});
+			}
 		}
 	});
 };
@@ -313,6 +386,8 @@ function syncSFConnFile(sfconnId){
 	    			if('InProgress' != docs.syncFileStatus){
 	    				docs.update({
 		    				syncFileStatus : 'InProgress'
+		    			},function(err){
+		    				if(err)console.log(err);
 		    			});
 				      	sfclient.describe(function(err,response,request){
 							var allData=[];
@@ -343,6 +418,8 @@ function syncSFConnFile(sfconnId){
 										docs.update({
 											syncFileStatus : 'fail',
 											lastFileSyncDate : new Date()
+										},function(err){
+											if(err)console.log(err);
 										});
 									} else {
 										docs.update({
@@ -364,18 +441,4 @@ function syncSFConnFile(sfconnId){
 	  		});
 		}
 	});
-}
-
-function fixCSFileStr(str){
-	if(str && ''!=str){
-		var headChar = str.charAt(0);
-		if(','!=headChar){
-			str = ','+str;
-		}
-		if(str.lastIndexOf(',') != (str.length-1) && str.length>1){
-			str += ',';
-		}
-	}
-	if(str.length<1) str=",,";
-	return str;
 }

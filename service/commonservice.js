@@ -15,9 +15,17 @@ exports.confirmDirExists = function(path,callback){
 };
 
 exports.checkFileExists = function(path,callback){
-	fs.existsSync(path,function(exists){
-		if(exists)callback(null);
-		else callback('Notexist');
+	var rootPath = fs.realpathSync('.');
+	var filePath = rootPath + path;
+	console.log('check '+ filePath +' exists or not');
+	fs.exists(filePath,function(exists){
+		if(exists){
+			console.log(filePath+' exist');
+			callback(null)
+		}else {
+			console.log(filePath+' not exist');
+			callback('Notexist');
+		}
 	});
 };
 
@@ -33,5 +41,5 @@ exports.connect2SFDC = function(sfconn,callback){
 		}else{
 			callback('err',null);
 		}
-	}
+	});
 };

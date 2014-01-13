@@ -9,8 +9,7 @@ var Deployment = new Schema({
   archiveId: {type: ObjectId, default: null},
   status : {type : String , default : 'new'},
   targetSFConnId : {type: ObjectId, default: null},
-  isTargetSFConnSave : {type : Boolean,default : false},
-  remainDeployment : {type : Boolean,default : true}
+  deployResult : { type : Array , default : []}
 });
  
 module.exports = mongoose.model('Deployment', Deployment);

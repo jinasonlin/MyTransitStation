@@ -46,6 +46,7 @@ block content
                         |#{metaData.metaObject.xmlName}
                       button.controlBtn.controlFold.btn.btn-xs(type="button",style="margin-left: 6px;")
                         span.glyphicon.glyphicon-plus-sign
+                      em(style="margin-left:4px;") contains #{metaData.childFiles.length} files
                   for childFile in metaData.childFiles
                     li(ref="#{metaData.metaObject.xmlName}",mode="metaObjectChild",style="display:none;margin-left: 20px;")
                       .checkbox

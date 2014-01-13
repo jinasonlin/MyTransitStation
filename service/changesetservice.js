@@ -9,28 +9,26 @@ var nodeforce = require("../lib/nodeforce"),
 	CommonService = require("./commonservice"),
 	fs = require('fs');
 
-var ChangeSetService = function(){}
-
-exports.doArchiveAction = function(sfconnId,archiveId,userId){
-	this.updateArchiveStatus(archiveId,'inProcess');
+//callback err: 1(fail,can retry action) 0(done) -1(err,action will never sucess)
+exports.archive = function(sfconnId,archiveId,userId,callback){
 	var zipFileName = userId+'_'+archiveId+'.zip';
 	SFConnection.findById(sfconnId,'-fileInfo',function(err,sfconn){
 		if(err || sfconn == null){
-			this.updateArchiveStatus(archiveId,'error');
+			callback(-1);
 		}else{
 			console.log('find sfconn '+sfconn.name);
 			CommonService.connect2SFDC(sfconn,function(err,client){
-				if(err)this.updateArchiveStatus(archiveId,'error');
+				if(err)callback(-1);
 				if(client){
 					console.log('login sf with '+sfconn.name);
 					Archive.findById(archiveId,function(err,archive){
 						if(err || archive == null){
-							this.updateArchiveStatus(archiveId,'error');
+							callback(-1);
 						}else{
 							console.log('find archive '+archive.name);
 							ChangeSet.findById(archive.changeSetId,function(err,changeSet){
 								if(err || changeSet == null || changeSet.files == null){
-									this.updateArchiveStatus(archiveId,'error');
+									callback(-1);
 								}else{
 									console.log('find ChangeSet '+changeSet.name);
 									var opts = {
@@ -53,18 +51,9 @@ exports.doArchiveAction = function(sfconnId,archiveId,userId){
 									opts.unpackaged.types = unpackagedTypes;
 									console.log('begin retrieve data');
 									retrieveData(client,opts,zipFileName,function(err,data){
-										if(err) this.updateArchiveStatus(archiveId,'fail');
+										if(err) callback(1);
 										else if(data){
-											//todo s3 storage
-											s3service.uplaodData(zipFileName,function(err,s3key){
-												if(err) this.updateArchiveStatus(archiveId,'fail');
-												else{
-													this.updateArchiveStatus(archiveId,'done',s3key);
-													if(!sfconn.remainSFConn){
-														SFConnection.findByIdAndRemove(sfconnId);
-													}
-												}
-											});
+											callback(0);
 										}
 									});
 								}
@@ -77,28 +66,61 @@ exports.doArchiveAction = function(sfconnId,archiveId,userId){
 	});
 };
 
-ChangeSetService.prototype.validate = function(validation,filePath,callback){
-
-};
-
 //callback err: 1(fail,can retry action) 0(done) -1(err,action will never sucess)
-ChangeSetService.prototype.deploy = function(deployment,filePath,callback){
+exports.deploy = function(deployment,filePath,checkOnly,callback){
 	CommonService.checkFileExists(filePath,function(err){
-		if(err)callback(err);
+		if(err)callback(1);
 		else{
+			console.log('find file '+ fs.realpathSync('.')+filePath + ' on disk.');
 			SFConnection.findById(deployment.targetSFConnId,function(err,sfconn){
-				if(err) callback(err);
+				if(err) callback(-1);
 				else{
 					CommonService.connect2SFDC(sfconn,function(err,client){
-						if(err)callback(err);
+						if(err)callback(-1);
 						else{
-							fs.readFile(filePath,{encoding:'base64'},function(err,data){
-								if(err)callback(err);
+							console.log('connect to sfdc sucess');
+							fs.readFile('./'+ filePath,{encoding:'base64'},function(err,data){
+								if(err)callback(1);
 								else{
-									client.deploy(data,{
-
+									console.log('begin do deploy');
+									var deployOptions = {
+										rollbackOnError : true,
+										runAllTests : true,
+										ignoreWarnings : false,
+										purgeOnDelete : true
+									}
+									if(checkOnly){
+										deployOptions.checkOnly = true;
+									}
+									client.deploy({
+										zipFile : data,
+										deployOptions : deployOptions
 									},function(err,response,request){
-
+										if(err) callback(1);
+										else{
+											var result = response.result;
+											var intervalId = setInterval(function(){
+												client.checkStatus({Id:result.id},function(err,resp,reqs){
+													var result1 = resp.result[0];
+													if(result1.done){
+														console.log('deploy action complete');
+														clearInterval(intervalId);
+														console.log('stop interval');
+														client.checkDeployStatus({
+															Id : result.id,
+															includeDetails : true
+														},function(err,resp1,req1){
+															if(resp1 && resp1.result && resp1.result.details){
+																callback(0,resp1.result.details);
+															}
+															if(err) callback(1);
+														});
+													}else{
+														console.log('check deploy status . state :'+result1.state);
+													}
+												});
+											},5000);
+										}
 									});
 								}
 							});
@@ -110,7 +132,7 @@ ChangeSetService.prototype.deploy = function(deployment,filePath,callback){
 	});
 };
 
-ChangeSetService.prototype.retrieveData = function(client,opts,fileName,callback){
+var retrieveData = function(client,opts,fileName,callback){
 	client.retrieve(opts,function(err,response,request){
 		var result=response.result;
 		var intervalId=setInterval(function(){

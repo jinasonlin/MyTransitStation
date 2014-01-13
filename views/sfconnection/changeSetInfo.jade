@@ -31,10 +31,13 @@ block content
                 else
                   button.btn.btn-xs.btn-info(type="button",style="margin-left:4px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
             .col-md-7.pull-right(style="padding-top: 3px;text-align:center;")
-              button.btn.btn-sm.btn-info.archive(type="button",style="margin-left:4px;") Archive
-              if changeSet.validateStatus!='inProgress'&&changeSet.deployStatus!='inProgress'
-                button.btn.btn-sm.btn-info.validate(type="button",style="margin-left:4px;") Validate
-                button.btn.btn-sm.btn-info.deploy(type="button",style="margin-left:4px;") Deploy
+              if changeSet.archiveStatus=='block'
+                button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="The last archive action in processing.") Archive
+              else
+                button.btn.btn-sm.btn-info.archive(type="button",style="margin-left:4px;") Archive
+              if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
+                button.btn.btn-sm.btn-info.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Validate
+                button.btn.btn-sm.btn-info.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Deploy
               else
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Validate
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Deploy
@@ -47,6 +50,7 @@ block content
                   h5 #{fileInfo.packName}
                     button.btn-xs.btn.controlBtn.controlFold(type="button",style="margin-left:4px;")
                       span.glyphicon.glyphicon-chevron-right
+                    em(style="margin-left: 4px;") contains #{fileInfo.files.length} files
                   for fileName in fileInfo.files
                     li(style="margin-left:15px;display:none;",ref="#{fileInfo.packName}",mode="file") 
                       em #{fileName}
@@ -62,7 +66,7 @@ block content
                   for archive in archives
                     li(id="#{archive._id}",style="margin:2px;") 
                       span #{archive.name}
-                      if archive.validateStatus!='inProgress'&&archive.deployStatus!='inProgress'
+                      if archive.validateStatus!='block'&&archive.deployStatus!='block'
                         button.btn.btn-xs.btn-info.bakvalidate(style="margin-left: 6px;") Validate
                         button.btn.btn-xs.btn-info.bakdeploy(style="margin-left: 6px;") Deploy
                       else
@@ -78,7 +82,11 @@ block content
           hr
           .row.block-body
             if validates
-              .col-md-7 Data.
+              .col-md-7 
+                ul.list-unstyled
+                  for validate in validates
+                    li(id="#{validate._id}",style="margin:2px;")
+                      span #{validate.name}
             else 
               .col-md-7 No Data.
         .row 
@@ -98,3 +106,4 @@ block content
           hr
           .row.block-body
             .col-md-7(style="height: 150px;overflow: auto;") #{changeSet.historyLog}
+  include newSFConn

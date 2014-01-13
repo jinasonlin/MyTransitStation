@@ -33,35 +33,11 @@ $(document).ready(function(){
 	});
 
 	$('button.validate').bind('click',function(){
-		var csId = $("#csId").val();
-		$(".container").spin(opts);
-		$.post('/changeSets/'+csId+'/validate').done(function(data){
-			$(".container").spin(false);
-			if('done'==data){
-				location.reload(true);
-			}else{
-				$(".row.alert").addClass('alert-danger');
-				$(".row.alert").text(data);
-				$(".row.alert").show();
-				$(".row.alert").fadeOut(10000);
-			}
-		});
+		$("#triggle-name").val("validation");
 	});
 
 	$('button.deploy').bind('click',function(){
-		var csId = $("#csId").val();
-		$(".container").spin(opts);
-		$.post('/changeSets/'+csId+'/deploy').done(function(data){
-			$(".container").spin(false);
-			if('done'==data){
-				location.reload(true);
-			}else{
-				$(".row.alert").addClass('alert-danger');
-				$(".row.alert").text(data);
-				$(".row.alert").show();
-				$(".row.alert").fadeOut(10000);
-			}
-		});
+		$("#triggle-name").val("deployment");
 	});
 });
 
