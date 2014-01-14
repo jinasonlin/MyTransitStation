@@ -45,12 +45,32 @@ exports.listOrganization = function(req, res) {
 
 exports.viewOrganization = function(req, res) {
   console.log("view org");
-  res.render('admin/organization/view');
+  var id = req.params.id;
+  Organization.findById(id, function (err, org) {
+    if (err) {
+      res.redirect('/admin/organization');
+    } else {
+      res.render('admin/organization/view', {org: org});
+    }
+  });
 };
 
 exports.editOrganization = function(req, res) {
   console.log("edit org");
-  res.render('admin/organization/edit');
+  var id = req.params.id;
+  if (id) {
+    // edit
+    Organization.findById(id, function (err, org) {
+      if (err) {
+        res.redirect('/admin/organization');
+      } else {
+        res.render('admin/organization/edit', {org: org});
+      }
+    });
+  } else {
+    // new
+    res.render('admin/organization/edit');
+  }
 };
 
 exports.createOrganization = function(req, res) {

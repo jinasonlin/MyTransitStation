@@ -1,0 +1,22 @@
+extends ../../layouts/layout-default
+
+block stylesheet
+  link(rel="stylesheet", href="/styles/admin.css", type="text/css")
+
+block scripts
+  script(type="text/javascript") var orgId = "#{org._id}";
+  script(type="text/javascript", src="/js/organization/view.js")
+
+block content
+  div(class="container")
+    h1 Salesforce Migration Tool Admin Console - View Organization
+    div(class="row")
+      div(class="col-sm-6")
+        <button type="button" class="btn btn-default btn-xs" id="editBtn">Edit</button>
+        <button type="button" class="btn btn-default btn-xs" id="backBtn">Back</button>
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Organization Name</strong>
+      div(class="col-sm-3") #{org.name}
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Description</strong>
+      div(class="col-sm-3") #{org.description}
