@@ -1,23 +1,21 @@
 var $=jQuery.noConflict();
 
 $(document).ready(function(){
-	initDeleteBtnAction();
 	initArchiveBtnAction();
-	initDeployBtnAction();
+	initDeleteBtnAction();
+	initDeployAndVlidateAction();
 });
 
-function initDeployBtnAction(){
-	$('table td button.deploy').each(function(){
-		var csId = $(this).parent().parent().attr('id');
-		var sfconnId = $("#sfconnId").val();
-		$(this).bind('click',function(){
-			$(".container").spin(opts);
-			$.post('/sfconn/'+sfconnId+'/changeSets/'+csId,{_method : 'delete'}).done(function(data){
-				$(".container").spin(false);
-				if('done'==data){
-					location.reload(true);
-				}
-			});
+function initDeployAndVlidateAction(){
+	$("tbody tr").each(function(){
+		var csId = $(this).attr('id');
+		$(this).find('td:last button.validate').bind('click',function(){
+			$("#newSFConn-csId").val(csId);
+			$("#triggle-name").val('validation');
+		});
+		$(this).find('button.deploy').bind('click',function(){
+			$("#newSFConn-csId").val(csId);
+			$("#triggle-name").val('deployment');
 		});
 	});
 }

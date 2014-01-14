@@ -1,0 +1,12 @@
+
+
+#simple-name.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
+    .modal-dialog
+      .modal-content
+        .modal-body
+          form.form-horizontal(role="form",action="/sfconn",method="post")
+            .form-group
+              label.col-sm-3.control-label(for="inputEmail") E-mail 
+              .col-sm-8
+                input.form-control(name="username",type="email",placeholder="Username") 
+              button.btn.btn-xs.btn-primary Submit

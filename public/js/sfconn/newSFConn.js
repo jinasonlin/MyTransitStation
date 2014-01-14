@@ -29,13 +29,14 @@ $(document).ready(function(){
 	});
 
 	if($("#csId").length>0){
+		$("#newSFConn-csId").val($("#csId").val());
 		$('#newSFConn .newSFConnSave').attr("disabled",true);
 		$('#newSFConn input').each(function(){
 			$(this).bind('change',function(){
 				$('#newSFConn .newSFConnSave').attr("disabled",true);
 			});
 		});
-		$('#newSFConn select').bind('change',function(){
+		$('#newSFConn select:first').bind('change',function(){
 			$('#newSFConn .newSFConnSave').attr("disabled",true);
 		});
 	}

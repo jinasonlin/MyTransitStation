@@ -253,8 +253,7 @@ exports.changeSetSave = function(req,res){
 		name : req.body.csName,
 		files : [],
 		sfconnId : req.params.sfconnId,
-		createdBy : req.session.user._id,
-		historyLog : 'Created by '+req.session.user.username+ ' at '+Moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+		createdBy : req.session.user._id
 	};
 	if(selectFiles && selectFiles.length>0){
 		async.eachSeries(selectFiles,function(fileInfo,callback){
@@ -294,8 +293,7 @@ exports.changeSetSave = function(req,res){
 						}else{
 							ChangeSet.findByIdAndUpdate(csId,{
 								$set : {
-									files : cs.files,
-									historyLog : 'Update by '+req.session.user.username+ ' at '+Moment(new Date()).format('YYYY-MM-DD HH:mm:ss')+' \n '+changeSet.historyLog
+									files : cs.files
 								}
 							},function(err,changeSet){
 								if(err)res.send({message : err});

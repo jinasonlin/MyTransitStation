@@ -9,7 +9,6 @@ var ChangeSet = new Schema({
   createdBy: {type: ObjectId, default: null},
   sfconnId: {type: ObjectId, default: null},
   files : {type : Array, default : []},
-  historyLog : {type : String , default : ''},
   archiveStatus : {type : String , default : 'none'},
   validateStatus : {type : String , default : 'none'},
   deployStatus : {type : String , default : 'none'}

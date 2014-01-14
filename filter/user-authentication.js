@@ -21,4 +21,4 @@ exports.checkSFConnLoggedin = function(req,res,next){
   }else{
     res.redirect("/sfconn/");
   }
-}
+};

@@ -35,8 +35,8 @@ script(type='text/javascript',src="/js/sfconn/newSFConn.js")
                 select#inputSelect.form-control(name="endpoint")
                   option.form-control(value="test.salesforce.com") sandbox
                   option.form-control(value="login.salesforce.com") production
-            if changeSet
-              input(type="hidden",name="csId",value="#{changeSet._id}")
+            if changeSet||changeSets
+              input#newSFConn-csId(type="hidden",name="csId",value="")
               input#triggle-name(type="hidden",name="triggleName",value="")
               .form-group
                 .col-sm-8.col-sm-offset-3
