@@ -11,7 +11,7 @@ block scripts
 block content
   input#sfconnId(type="hidden",value="#{sfconn._id}")
   input#csId(type="hidden",value="#{changeSet._id}")
-  .container
+  .container.well.well-lg
     .panel
       .panel-heading 
         .col-md-10
@@ -34,7 +34,7 @@ block content
               if changeSet.archiveStatus=='block'
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="The last archive action in processing.") Archive
               else
-                button.btn.btn-sm.btn-primary.archive(type="button",style="margin-left:4px;") Archive
+                button.btn.btn-sm.btn-primary.archive(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-name") Archive
               if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
                 button.btn.btn-sm.btn-primary.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Validate
                 button.btn.btn-sm.btn-primary.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Deploy
@@ -59,6 +59,7 @@ block content
             .col-md-3
               h4 Archives
           hr
+          .row.alert.archive-alert(style="display:none;")
           .row.block-body
             if archives && archives.length>0
               .col-md-7
@@ -72,7 +73,7 @@ block content
                     for archive in archives
                       tr(id="#{archive._id}")
                         td 
-                          a(href="#")
+                          a(href="/archive/#{archive._id}")
                             |#{archive.name}
                         td 
                           if archive.status=='new'
@@ -80,7 +81,7 @@ block content
                           else 
                             |#{archive.status}
                         td 
-                          if archive.validateStatus!='block'&&archive.deployStatus!='block'
+                          if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
                             button.btn.btn-xs.btn-primary.bakvalidate(style="margin-left: 6px;") Validate
                             button.btn.btn-xs.btn-primary.bakdeploy(style="margin-left: 6px;") Deploy
                           else
@@ -102,6 +103,7 @@ block content
             .col-md-3
               h4 Validates
           hr
+          .row.alert.validate-alert(style="display:none;")
           .row.block-body
             if validates && validates.length>0
               .col-md-7 
@@ -115,7 +117,7 @@ block content
                     for validate in validates
                       tr(id="#{validate._id}")
                         td 
-                          a(href="#")
+                          a(href="/validation/#{validate._id}")
                             |#{validate.name}
                         td
                           if validate.status=='new'
@@ -135,6 +137,7 @@ block content
             .col-md-3
               h4 Deploys
           hr
+          .row.alert.deploy-alert(style="display:none;")
           .row.block-body
             if deploys && deploys.length>0
               .col-md-7 
@@ -148,7 +151,7 @@ block content
                     for deploy in deploys
                       tr(id="#{deploy._id}")
                         td 
-                          a(href="#")
+                          a(href="/deployment/#{deploy._id}")
                             |#{deploy.name}
                         td
                           if deploy.status=='new'
@@ -164,3 +167,4 @@ block content
             else 
               .col-md-7 No Data.
   include newSFConn
+  include single-name

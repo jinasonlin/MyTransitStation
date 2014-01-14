@@ -5,7 +5,8 @@ var nodeforce = require("../lib/nodeforce"),
  	Validation = require("../model/validation"),
 	Deployment = require("../model/deployment"),
  	async = require("async"),
- 	Moment = require("moment");
+ 	Moment = require("moment"),
+ 	changeSetService = require('../service/changesetservice');
 
  	Moment.lang('en_gb');
  	var datefmt = 'YYYY-MM-DD HH:mm:ss';
@@ -42,7 +43,7 @@ exports.addSFConn = function(req,res){
 	var isStore = req.body.isStore;
 	var csId = req.body.csId;
 	var triggel_name = req.body.triggleName;
-	console.log(req.body);
+	var name = req.body.name;
 	if(csId && triggel_name){
 		if(!isStore){
 			newSFConn.sfconntype = 'temp';
@@ -57,17 +58,16 @@ exports.addSFConn = function(req,res){
 			if(csId){
 				ChangeSet.findById(csId,function(err,changeSet){
 					if(changeSet){
-						if('none' == changeSet.validateStatus &&'none' == changeSet.deployStatus){
+						if('none' == changeSet.validateStatus && 'none' == changeSet.deployStatus){
 							if('validation' == triggel_name){
 								var newValidation = {};
-									newValidation.name = Moment(new Date).format(datefmt);
+									newValidation.name = name;
 									newValidation.changeSetId = csId;
 									newValidation.targetSFConnId = docs._id;
+									newValidation.createdBy = req.session.user._id;
 									new Validation(newValidation).save(function(err){
 										if(!err){
-											ChangeSet.findByIdAndUpdate(csId,{
-												validateStatus : 'block'
-											},function(err){
+											changeSetService.updateValidateStatus(changeSet._id,'block',function(err){
 												if(err)console.log(err);
 											});
 										}
@@ -76,14 +76,13 @@ exports.addSFConn = function(req,res){
 							}
 							if('deployment' == triggel_name){
 								var newDeployment = {};
-								newDeployment.name = Moment(new Date).format(datefmt);
+								newDeployment.name = name;
 								newDeployment.changeSetId = csId;
 								newDeployment.targetSFConnId = docs._id;
+								newDeployment.createdBy = req.session.user._id;
 								new Deployment(newDeployment).save(function(err){
 									if(!err){
-										ChangeSet.findByIdAndUpdate(csId,{
-											deployStatus : 'block'
-										},function(err){
+										changeSetService.updateDeployStatus(changeSet._id,'block',function(err){
 											if(err)console.log(err);
 										});
 									}

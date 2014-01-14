@@ -1,0 +1,12 @@
+
+.row
+  .col-sm-7.col-md-7.col-sm-offset-1.col-md-offset-1
+    p
+      h1 Welcome to Salesforce Migration Tool!
+  .col-sm-2.col-md-2(style="margin-top: 40px;")
+    if user
+      span Welcome ,&nbsp; 
+        a
+          |#{user.username}
+      a(href="/user/logout") 
+        button.btn.btn-warning.btn-xs Sign out

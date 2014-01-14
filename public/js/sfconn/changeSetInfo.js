@@ -18,18 +18,7 @@ $(document).ready(function(){
 
 	$('button.archive').bind('click',function(){
 		var csId = $("#csId").val();
-		$(".container").spin(opts);
-		$.post('/changeSets/'+csId+'/archives').done(function(data){
-			$(".container").spin(false);
-			if('done'==data){
-				location.reload(true);
-			}else{
-				$(".row.alert").addClass('alert-danger');
-				$(".row.alert").text(data);
-				$(".row.alert").show();
-				$(".row.alert").fadeOut(10000);
-			}
-		});
+		$('#single-name input.targetCSId').val(csId);
 	});
 
 	$('button.validate').bind('click',function(){
@@ -38,6 +27,54 @@ $(document).ready(function(){
 
 	$('button.deploy').bind('click',function(){
 		$("#triggle-name").val("deployment");
+	});
+
+	$('button.archive-drop').bind('click',function(){
+		$(".container").spin(opts);
+		var itemId = $(this).parent().parent().attr('id');
+		$.post('/changeSet/archive/'+itemId,{_method:'delete'}).done(function(data){
+			$(".container").spin(false);
+			if('done'==data){
+				location.reload(true);
+			}else{
+				$(".row.alert.archive-alert").addClass('alert-danger');
+				$(".row.alert.archive-alert").text(data);
+				$(".row.alert.archive-alert").show();
+				$(".row.alert.archive-alert").fadeOut(6000);
+			}
+		});
+	});
+
+	$('button.validation-drop').bind('click',function(){
+		$(".container").spin(opts);
+		var itemId = $(this).parent().parent().attr('id');
+		$.post('/changeSet/validation/'+itemId,{_method:'delete'}).done(function(data){
+			$(".container").spin(false);
+			if('done'==data){
+				location.reload(true);
+			}else{
+				$(".row.alert.validate-alert").addClass('alert-danger');
+				$(".row.alert.validate-alert").text(data);
+				$(".row.alert.validate-alert").show();
+				$(".row.alert.validate-alert").fadeOut(6000);
+			}
+		});
+	});
+
+	$('button.deployment-drop').bind('click',function(){
+		$(".container").spin(opts);
+		var itemId = $(this).parent().parent().attr('id');
+		$.post('/changeSet/deployment/'+itemId,{_method:'delete'}).done(function(data){
+			$(".container").spin(false);
+			if('done'==data){
+				location.reload(true);
+			}else{
+				$(".row.alert.deploy-alert").addClass('alert-danger');
+				$(".row.alert.deploy-alert").text(data);
+				$(".row.alert.deploy-alert").show();
+				$(".row.alert.deploy-alert").fadeOut(6000);
+			}
+		});
 	});
 });
 

@@ -34,6 +34,10 @@ app.use(express.session({
   }),
   cookie: {path: '/', maxAge: null}
 }));
+app.use(function(req,res,next){
+  res.locals.user = req.session.user;
+  next();
+});
 
 app.configure("production", function() {
   // Do some production-specific action

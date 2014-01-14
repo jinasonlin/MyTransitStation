@@ -209,19 +209,37 @@ exports.updateArchiveDeplyStatus = function(archiveId,status){
 };
 
 //update changeset validateStatus
-exports.updateValidateStatus = function(changeSetId,status){
+exports.updateValidateStatus = function(changeSetId,status,callback){
 	ChangeSet.findById(changeSetId,function(err,changeSet){
 		if(changeSet){
-			changeSet.update({validateStatus:status});
+			changeSet.update({validateStatus:status},function(err){
+				if(err)callback(err);
+				else callback(null);
+			});
 		}
 	});
 };
 
 //update changeset deployStatus
-exports.updateDeployStatus = function(changeSetId,status){
+exports.updateDeployStatus = function(changeSetId,status,callback){
 	ChangeSet.findById(changeSetId,function(err,changeSet){
 		if(changeSet){
-			changeSet.update({deployStatus:status});
+			changeSet.update({deployStatus:status},function(err){
+				if(err)callback(err);
+				else callback(null);
+			});
+		}
+	});
+};
+
+//update changeset archiveStatus
+exports.updateArchiveStatus = function(changeSetId,status,callback){
+	ChangeSet.findById(changeSetId,function(err,changeSet){
+		if(changeSet){
+			changeSet.update({archiveStatus:status},function(err){
+				if(err)callback(err);
+				else callback(null);
+			});
 		}
 	});
 };
@@ -240,6 +258,81 @@ exports.updateDeploymentStatus = function(deploymentId,status){
 	Deployment.findById(deploymentId,function(err,deployment){
 		if(deployment){
 			deployment.update({status:status});
+		}
+	});
+};
+
+exports.checkCSArchiveStatus = function(csId,callback){
+	Archive.find({changeSetId:csId},function(err,archives){
+        if(archives){
+            var isBreak = false;
+            for(var i=0;i<archives.length;i++){
+                var archive = archives[i];
+                if(archive.status == 'inProcess'){
+                    ChangeSet.findByIdAndUpdate(csId,{archiveStatus:'block'},function(err){
+                        if(err)callback(err);
+                        else callback(null);
+                    });
+                    isBreak=true;
+                    break;
+                }
+            }
+            if(!isBreak){
+                ChangeSet.findByIdAndUpdate(csId,{archiveStatus:'none'},function(err){
+                    if(err)callback(err);
+                    else callback(null);
+                });
+            }
+        }
+    });
+};
+
+exports.checkCSValidateStatus = function(csId,callback){
+	Validation.find({changeSetId:csId},function(err,validations){
+		if(validations){
+			var isBreak = false;
+			for(var i=0;i<validations.length;i++){
+				var validation = validations[i];
+				if(validation.status == 'inProcess'){
+					 ChangeSet.findByIdAndUpdate(csId,{validateStatus:'block'},function(err){
+                        if(err)callback(err);
+                        else callback(null);
+                    });
+                    isBreak=true;
+                    break;
+				}
+			}
+			if(!isBreak){
+				ChangeSet.findByIdAndUpdate(csId,{validateStatus:'none'},function(err){
+                    if(err)callback(err);
+                    else callback(null);
+                });
+			}
+		}
+	});
+};
+
+exports.checkCSDeployStatus = function(csId,callback){
+	Deployment.find({changeSetId:csId},function(err,deployments){
+		if(deployments){
+			var isBreak = false;
+			for(var i=0;i<deployments.length;i++){
+				var deployment = deployments[i];
+				if(deployment.status == 'inProcess'){
+					 ChangeSet.findByIdAndUpdate(csId,{deployStatus:'block'},function(err){
+                        if(err)callback(err);
+                        else callback(null);
+                    });
+                    isBreak=true;
+                    break;
+				}
+			}
+			if(!isBreak){
+				ChangeSet.findByIdAndUpdate(csId,{deployStatus:'none'},function(err){
+                    if(err)callback(err);
+                    else callback(null);
+                });
+			}
 		}
 	});
 };

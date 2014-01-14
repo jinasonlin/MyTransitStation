@@ -10,7 +10,7 @@ block scripts
 
 block content
   input#sfconnId(type="hidden",value="#{sfconn._id}")
-  .container
+  .container.well.well-lg
     .panel
       .panel-heading 
         .col-md-10
@@ -36,7 +36,7 @@ block content
                  th ChangeSet Name
                  th Created By
                  th Created Date
-                 th Actions
+                 th Action
               tbody
                 for changeSet in changeSets
                   tr(id="#{changeSet._id}")
@@ -51,13 +51,13 @@ block content
                         button.btn.btn-xs.btn-warning(style="margin-left:6px;",type="button",title="Archiving. You can't do archive at the moment.") Archive
                       else
                         button.btn.btn-xs.btn-info(style="margin-left:6px;",type="button",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
-                        button.btn.btn-xs.btn-primary.archive(style="margin-left:6px;",type="button") Archive
-                      if changeSet.deployStatus=='block' || changeSet.validateStatus=='block'
-                        button.btn.btn-xs.btn-warning(style="margin-left:6px;",type="button",title="This is an validation/deployment in processing.") Validate
-                        button.btn.btn-xs.btn-warning(style="margin-left:6px;",type="button",title="This is an validation/deployment in processing.") Deploy
-                      else
-                        button.btn.btn-xs.btn-primary.validate(style="margin-left:6px;",type="button",data-toggle="modal",data-target="#newSFConnPanel") Validate
-                        button.btn.btn-xs.btn-primary.deploy(style="margin-left:6px;",type="button",data-toggle="modal",data-target="#newSFConnPanel") Deploy
+                        button.btn.btn-xs.btn-primary.archive(style="margin-left:6px;",type="button",data-toggle="modal",data-target='#single-name') Archive
+                      //- if changeSet.deployStatus=='block' || changeSet.validateStatus=='block'
+                      //-   button.btn.btn-xs.btn-warning(style="margin-left:6px;",type="button",title="This is an validation/deployment in processing.") Validate
+                      //-   button.btn.btn-xs.btn-warning(style="margin-left:6px;",type="button",title="This is an validation/deployment in processing.") Deploy
+                      //- else
+                      //-   button.btn.btn-xs.btn-primary.validate(style="margin-left:6px;",type="button",data-toggle="modal",data-target="#newSFConnPanel") Validate
+                      //-   button.btn.btn-xs.btn-primary.deploy(style="margin-left:6px;",type="button",data-toggle="modal",data-target="#newSFConnPanel") Deploy
         else
           .row(style="margin-left: 30px;") No Data.
-  include newSFConn
+  include single-name

@@ -24,18 +24,7 @@ function initArchiveBtnAction(){
 	$('table td button.archive').each(function(){
 		var csId = $(this).parent().parent().attr('id');
 		$(this).bind('click',function(){
-			$(".container").spin(opts);
-			$.post('/changeSets/'+csId+'/archives').done(function(data){
-				$(".container").spin(false);
-				if('done'==data){
-					location.reload(true);
-				}else{
-					$(".row.alert").addClass('alert-danger');
-					$(".row.alert").text(data);
-					$(".row.alert").show();
-					$(".row.alert").fadeOut(6000);
-				}
-			});
+			$("#single-name input.targetCSId").val(csId);
 		});
 	});
 }
