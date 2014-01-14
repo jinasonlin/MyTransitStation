@@ -1,18 +1,17 @@
-var authentication = require("./filter/user-authentication")
-  , site = require('./controller/site')
+var userAuthFilter = require("./filter/userAuthFilter")
   , user = require('./controller/user')
-  , metadata = require('./controller/metadata')
   , sfconnManager = require("./controller/sfconnManager")
+  , adminAuthFilter = require("./filter/adminAuthFilter")
   , admin = require('./controller/admin');
 
 module.exports = function(app) {
-  //app.get("/", authentication.redirectIfLoggedIn, site.index);
-  var user = require('./controller/user')
-
-  app.get("/", user.showloginForm);
-  app.get("/user/login", user.login);
+  // user login
+  app.get("/", userAuthFilter.redirectToHomePageIfAlreadyLoggedIn, user.showloginForm);
+  app.get("/user/login", userAuthFilter.redirectToHomePageIfAlreadyLoggedIn, user.login);
+  app.get("/user/logout", user.logout);
 
   //sfconn manage routes
+  app.all(/^\/sfconn(\w)*/, userAuthFilter.checkLogin);
   app.get("/sfconn",sfconnManager.listSFConn);
   app.post("/sfconn",sfconnManager.addSFConn);
   app.post("/sfconn/validate",sfconnManager.validateSFConn);
@@ -20,22 +19,26 @@ module.exports = function(app) {
   app.get("/sfconn/:sfconnId",sfconnManager.listSFConnInfo);
   app.put("/sfconn/:sfconnId",sfconnManager.updateSFConn);
   app.delete("/sfconn/:sfconnId",sfconnManager.deleteSFConn);
-  
-  app.all("/sfconn/:sfconnId/*",authentication.checkSFConnLoggedin);
+
   app.get("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetInit);
   app.post("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetNew);
   app.get("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetInfo);
   app.put("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetEdit);
   app.delete("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetDelete);
 
-  /*
-  app.get("/admin", user.showAdminLoginForm);
-  app.get("/admin/login", user.adminLogin);
+  // admin login
+  app.get("/admin", adminAuthFilter.redirectToHomePageIfAlreadyLoggedIn, admin.showloginForm);
+  app.get("/admin/login", adminAuthFilter.redirectToHomePageIfAlreadyLoggedIn, admin.login);
+  app.get("/admin/logout", admin.logout);
 
-  app.all("/metadata/*", authentication.checkLogin);
-  app.get("/metadata/list", metadata.list);
+  app.all(/^\/admin\/organization(\w)*/, adminAuthFilter.checkLogin);
+  app.get("/admin/organization", adminAuthFilter.checkLoginOfSuperAdmin, admin.listOrganization);
+  app.get("/admin/organization/new", adminAuthFilter.checkLoginOfSuperAdmin, admin.editOrganization);
+  app.get("/admin/organization/:id", adminAuthFilter.checkLoginOfSuperAdmin, admin.viewOrganization);
+  app.get("/admin/organization/:id/edit", adminAuthFilter.checkLoginOfSuperAdmin, admin.editOrganization);
+  app.post("/admin/organization", adminAuthFilter.checkLoginOfSuperAdmin, admin.createOrganization);
+  app.put("/admin/organization/:id", adminAuthFilter.checkLoginOfSuperAdmin, admin.updateOrganization);
+  app.delete("/admin/organization/:id", adminAuthFilter.checkLoginOfSuperAdmin, admin.deleteOrganization);
 
-  app.get("/organization/new", user.initOrganizationForm);
-  app.post("/organization", user.saveOrganization);
-  */
+  app.get("/admin/organization/user", function(req, res) {res.send(200)});
 }

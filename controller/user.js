@@ -1,6 +1,5 @@
-var nodeforce = require("../lib/nodeforce");
-var Organization = require('../model/organization');
-var User = require('../model/user');
+var User = require('../model/user')
+  , encrypService = require("../service/encrypservice");
 
 exports.showloginForm = function(req, res) {
   res.render('user/login-form');
@@ -8,12 +7,12 @@ exports.showloginForm = function(req, res) {
 
 exports.login = function(req, res) {
   User.findOne({
-    username: req.body.username,
-    password: req.body.password
+    username: req.param("username", ""),
+    password: encrypService.generateHashPassword(req.param("password", ""))
   }, function (err, user) {
-    console.log("login with " + req.body.username + ": " + user);
     if (user != null) {
       // found valid user
+      console.log("user[" + user.username + "] logged in successfully");
       req.session.user = user;
       req.session.save(function(err) {
         res.redirect('/sfconn');
@@ -24,7 +23,14 @@ exports.login = function(req, res) {
   });
 };
 
+exports.logout = function(req, res) {
+  req.session.destroy(function(err) {
+    res.redirect('/');
+  });
+};
+
 /*
+var nodeforce = require("../lib/nodeforce");
 exports.login = function(req, res) {
   global.client = nodeforce.createClient({
     username: req.body.username,
