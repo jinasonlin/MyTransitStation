@@ -36,7 +36,7 @@ script(type='text/javascript',src="/js/sfconn/newSFConn.js")
                   option.form-control(value="test.salesforce.com") sandbox
                   option.form-control(value="login.salesforce.com") production
             if changeSet
-              input(type="hidden",name="csId",value="#{changeSet._id}")
+              input#newSFConn-csId(type="hidden",name="csId",value="")
               input#triggle-name(type="hidden",name="triggleName",value="")
               .form-group
                 .col-sm-8.col-sm-offset-3
@@ -45,6 +45,10 @@ script(type='text/javascript',src="/js/sfconn/newSFConn.js")
                       input#isStore(type="checkbox",name="isStore") 
                       p
                         |Remenber This Connection
+              .form-group
+                label.col-sm-3.control-label(for="inputName") Name 
+                .col-sm-8
+                  input#inputName.form-control(name="name",type="text",placeholder="Name")
             .form-group
               .validInfo.alert.alert-success.col-sm-8.col-sm-offset-3(style='display:none;').
                   You org connects well.

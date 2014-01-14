@@ -29,10 +29,17 @@ module.exports = function(app) {
   app.get("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetInfo);
   app.delete("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetDelete);
 
+  
+  app.all(/^\/changeSet(\w)*/, userAuthFilter.checkLogin);
   // todo: determine if these still need, if not we then remove them
   app.post("/changeSets/:changeSetId/archives",changeSetManager.addArchive);
-  app.post("/changeSets/:changeSetId/validate",changeSetManager.addValidation);
-  app.post("/changeSets/:changeSetId/deploy",changeSetManager.addDeployment);
+
+  //app.get("/changeSet/archive/:archiveId",changeSetManager.viewArchive);
+  app.delete("/changeSet/archive/:archiveId",changeSetManager.deleteArchive);
+  //app.get("/changeSet/validation/:validationId",changeSetManager.viewValidation);
+  app.delete("/changeSet/validation/:validationId",changeSetManager.deleteValidation);
+  //app.get("/changeSet/deployment/:deploymentId",changeSetManager.viewDeployment);
+  app.delete("/changeSet/deployment/:deploymentId",changeSetManager.deleteDeployment);
 
   app.get("/test",test.testDeploy);
 

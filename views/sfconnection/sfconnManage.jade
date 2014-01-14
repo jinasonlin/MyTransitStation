@@ -8,11 +8,11 @@ block scripts
 block content
   if errMessage
     p #{errMessage}
-  .container.well.well-lg(style="background: #ccc;")
+  .container.well.well-lg
     .page-header
-      h1 
+      h2 
         span Salesforce Connections
-        button.btn.btn-info.btn-xs(data-toggle="modal",data-target="#newSFConnPanel",style="margin-left:10px;")
+        button.btn.btn-primary.btn-xs(data-toggle="modal",data-target="#newSFConnPanel",style="margin-left:10px;")
           span.glyphicon.glyphicon-plus-sign
           span(style="margin-left:6px;")
             |New connection
@@ -32,8 +32,12 @@ block content
                       |Edit
                     span.badge.badge-signIn.sfchangeSet(style="margin-left:2px;")
                       |Changesets
-                    span.badge.badge-signIn.sffileSync(style="margin-left:4px;")
-                      |SyncFiles
+                    if oriSFConn.syncFileStatus=='InProgress'
+                      span.badge.badge-signIn.sffileSync(style="margin-left:4px;",disabled=true)
+                        |SyncFiles
+                    else
+                      span.badge.badge-signIn.sffileSync(style="margin-left:4px;",disabled=true)
+                        |SyncFiles
           .col-md-7.col-sm-7(style="margin-top: 10px;")
             p
               |SyncFileStatus : #{oriSFConn.syncFileStatus} , lastFileSyncDate : #{oriSFConn.lastFileSyncDate}
@@ -68,7 +72,10 @@ block content
                     .col-sm-8
                       select.form-control(name="endpoint",value="#{oriSFConn.conn_env}")
                         option.form-control(value="test.salesforce.com") sandbox
-                        option.form-control(value="login.salesforce.com") production
+                        if oriSFConn.conn_env=='login.salesforce.com'
+                          option.form-control(value="login.salesforce.com",selected='selected') production
+                        else
+                          option.form-control(value="login.salesforce.com") production
                   .form-group
                     .validInfo.alert.alert-success.col-sm-8.col-sm-offset-3(style='display:none;').
                         You org connects well.

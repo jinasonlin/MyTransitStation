@@ -1,6 +1,9 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
-  , ObjectId = Schema.ObjectId;
+  , ObjectId = Schema.ObjectId
+  , Archive = require('./archive')
+  , Validation = require('./validation')
+  , Deployment = require('./deployment');
  
 var ChangeSet = new Schema({
   name: {type :String,default : ''},
@@ -9,10 +12,9 @@ var ChangeSet = new Schema({
   createdBy: {type: ObjectId, default: null},
   sfconnId: {type: ObjectId, default: null},
   files : {type : Array, default : []},
-  historyLog : {type : String , default : ''},
   archiveStatus : {type : String , default : 'none'},
   validateStatus : {type : String , default : 'none'},
   deployStatus : {type : String , default : 'none'}
 });
- 
+
 module.exports = mongoose.model('ChangeSet', ChangeSet);

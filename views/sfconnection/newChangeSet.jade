@@ -28,7 +28,7 @@ block content
               else
                 input#changeSetName.form-control(name="changeSetName",type="text",placeholder="Changeset Name")
             .col-md-1
-              button#newCSSaveBtn.btn.btn-info.btn-md(type="button") Save
+              button#newCSSaveBtn.btn.btn-primary.btn-md(type="button") Save
             #warning.col-md-4(style="display:none;height:34px;")
               .alert.alert-warning.form-control(style="padding-top:6px;") 
           .form-group
@@ -39,7 +39,7 @@ block content
                   |#{message}
               ul.list-unstyled
                 for metaData in _sfconn.fileInfo
-                  li(ref="#{metaData.metaObject.xmlName}") 
+                  li(ref="#{metaData.metaObject.xmlName}",mode="metaObject") 
                     .checkbox
                       label
                         input(type="checkbox",mode="metaObjectAllCheck",name="metaObject")
@@ -47,6 +47,7 @@ block content
                       button.controlBtn.controlFold.btn.btn-xs(type="button",style="margin-left: 6px;")
                         span.glyphicon.glyphicon-plus-sign
                       em(style="margin-left:4px;") contains #{metaData.childFiles.length} files
+                      em
                   for childFile in metaData.childFiles
                     li(ref="#{metaData.metaObject.xmlName}",mode="metaObjectChild",style="display:none;margin-left: 20px;")
                       .checkbox

@@ -11,7 +11,7 @@ block scripts
 block content
   input#sfconnId(type="hidden",value="#{sfconn._id}")
   input#csId(type="hidden",value="#{changeSet._id}")
-  .container
+  .container.well.well-lg
     .panel
       .panel-heading 
         .col-md-10
@@ -34,10 +34,10 @@ block content
               if changeSet.archiveStatus=='block'
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="The last archive action in processing.") Archive
               else
-                button.btn.btn-sm.btn-info.archive(type="button",style="margin-left:4px;") Archive
+                button.btn.btn-sm.btn-primary.archive(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-name") Archive
               if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
-                button.btn.btn-sm.btn-info.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Validate
-                button.btn.btn-sm.btn-info.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Deploy
+                button.btn.btn-sm.btn-primary.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Validate
+                button.btn.btn-sm.btn-primary.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Deploy
               else
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Validate
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Deploy
@@ -59,20 +59,43 @@ block content
             .col-md-3
               h4 Archives
           hr
+          .row.alert.archive-alert(style="display:none;")
           .row.block-body
-            if archives
-              .col-md-7 
-                ul.list-unstyled
-                  for archive in archives
-                    li(id="#{archive._id}",style="margin:2px;") 
-                      span #{archive.name}
-                      if archive.validateStatus!='block'&&archive.deployStatus!='block'
-                        button.btn.btn-xs.btn-info.bakvalidate(style="margin-left: 6px;") Validate
-                        button.btn.btn-xs.btn-info.bakdeploy(style="margin-left: 6px;") Deploy
-                      else
-                        button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Validate
-                        button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Deploy
-                      
+            if archives && archives.length>0
+              .col-md-7
+                table.table.table-condensed
+                  thead
+                    tr
+                      th Archive Name
+                      th Status
+                      th Action
+                  tbody
+                    for archive in archives
+                      tr(id="#{archive._id}")
+                        td 
+                          a(href="/archive/#{archive._id}")
+                            |#{archive.name}
+                        td 
+                          if archive.status=='new'
+                            |Queued
+                          else 
+                            |#{archive.status}
+                        td 
+                          if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
+                            button.btn.btn-xs.btn-primary.bakvalidate(style="margin-left: 6px;") Validate
+                            button.btn.btn-xs.btn-primary.bakdeploy(style="margin-left: 6px;") Deploy
+                          else
+                            button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Validate
+                            button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Deploy
+                          if archive.status=='inProcess'
+                            button.btn.btn-xs.btn-info.bakcancel(style="margin-left: 6px;") Cancel
+                            button.btn.btn-xs.btn-warning(disabled=true,style="margin-left: 6px;") Drop
+                          else
+                            button.btn.btn-xs.btn-warning.archive-drop(style="margin-left: 6px;") Drop
+                          if archive.status=='done'
+                            a(href="#")
+                              button.btn.btn-xs.btn-info.pull-right Download
+
             else 
               .col-md-7 No Data.
         .row 
@@ -80,13 +103,33 @@ block content
             .col-md-3
               h4 Validates
           hr
+          .row.alert.validate-alert(style="display:none;")
           .row.block-body
-            if validates
+            if validates && validates.length>0
               .col-md-7 
-                ul.list-unstyled
-                  for validate in validates
-                    li(id="#{validate._id}",style="margin:2px;")
-                      span #{validate.name}
+                table.table.table-condensed
+                  thead
+                    tr
+                      th Validation Name
+                      th Status
+                      th Action
+                  tbody
+                    for validate in validates
+                      tr(id="#{validate._id}")
+                        td 
+                          a(href="/validation/#{validate._id}")
+                            |#{validate.name}
+                        td
+                          if validate.status=='new'
+                            |Queued
+                          else 
+                            |#{validate.status}
+                        td
+                          if validate.status=='inProcess'
+                            button.btn.btn-xs.btn-info(style="margin-left: 6px;") Cancel
+                            button.btn.btn-xs.btn-warning(disabled=true,style="margin-left: 6px;") Drop
+                          else
+                            button.btn.btn-xs.btn-warning.validation-drop(style="margin-left: 6px;") Drop
             else 
               .col-md-7 No Data.
         .row 
@@ -94,16 +137,34 @@ block content
             .col-md-3
               h4 Deploys
           hr
+          .row.alert.deploy-alert(style="display:none;")
           .row.block-body
-            if deploys
-              .col-md-7 Data.
+            if deploys && deploys.length>0
+              .col-md-7 
+                table.table.table-condensed
+                  thead
+                    tr
+                      th Deployment Name
+                      th Status
+                      th Action
+                  tbody
+                    for deploy in deploys
+                      tr(id="#{deploy._id}")
+                        td 
+                          a(href="/deployment/#{deploy._id}")
+                            |#{deploy.name}
+                        td
+                          if deploy.status=='new'
+                            |Queued
+                          else 
+                            |#{deploy.status}
+                        td
+                          if deploy.status=='inProcess'
+                            button.btn.btn-xs.btn-info(style="margin-left: 6px;") Cancel
+                            button.btn.btn-xs.btn-warning(disabled=true,style="margin-left: 6px;") Drop
+                          else
+                            button.btn.btn-xs.btn-warning.deployment-drop(style="margin-left: 6px;") Drop
             else 
               .col-md-7 No Data.
-        .row 
-          .row
-            .col-md-3
-              h4 History
-          hr
-          .row.block-body
-            .col-md-7(style="height: 150px;overflow: auto;") #{changeSet.historyLog}
   include newSFConn
+  include single-name

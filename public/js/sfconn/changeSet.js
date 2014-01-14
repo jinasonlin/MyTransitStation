@@ -21,14 +21,27 @@ $(document).ready(function(){
 		$(this).bind('click',function(){
 			if(ref){
 				if($(this)[0].checked){
+					var childLength = $("li[ref='"+ref+"'][mode='metaObjectChild']").length;
+					$(this).parent().parent().find('em:last').text(' ('+childLength+' file select.)');
 					$("input[ref='"+ref+"'][mode='metaFile']").each(function(){
 						$(this)[0].checked=true;
 					});
 				}else{
+					$(this).parent().parent().find('em:last').text(' (0 file select.)');
 					$("input[ref='"+ref+"'][mode='metaFile']").each(function(){
 						$(this)[0].checked=false;
 					});
 				}
+			}
+		});
+	});
+
+	$("input[mode='metaFile']").each(function(){
+		var ref = $(this).attr('ref');
+		$(this).bind('click',function(){
+			if(ref){
+				var childLength = $("input[ref='"+ref+"'][mode='metaFile']:checked").length;
+				$("li[ref='"+ref+"'][mode='metaObject'] em:last").text(' ('+childLength+' file select.)');
 			}
 		});
 	});
@@ -76,5 +89,11 @@ $(document).ready(function(){
 				}
 			});
 		}
+	});
+
+	$("li[mode='metaObject']").each(function(){
+		var metaName = $(this).attr('ref');
+		var childLength = $("li[ref='"+metaName+"'][mode='metaObjectChild'] input:checked").length;
+		$(this).find('em:last').text(' ('+childLength+' file select.)');
 	});
 });
