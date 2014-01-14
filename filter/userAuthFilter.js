@@ -17,3 +17,12 @@ exports.redirectToHomePageIfAlreadyLoggedIn = function(req, res, next) {
     next();
   }
 };
+
+exports.checkSFConnLoggedin = function(req,res,next) {
+  var sfconnId = req.params.sfconnId;
+  if(global.sfclient && global.sfclient.userId){
+    next();
+  }else{
+    res.redirect("/sfconn/");
+  }
+};

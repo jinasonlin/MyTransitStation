@@ -1,0 +1,70 @@
+/**
+ * New node file
+ */
+var $=jQuery.noConflict();
+$(document).ready(function(){
+	$('.sfconnEditForm').each(function(){
+		var sfconnId=$(this).parent().parent().parent().parent().attr('id');
+		var sfconn={};
+		$(this).find('.connValidate').bind('click',function(){
+			sfconn.name=$('#'+sfconnId).find("input[name='connName']").val();
+			sfconn.username=$('#'+sfconnId).find("input[name='username']").val();
+			sfconn.password=$('#'+sfconnId).find("input[name='password']").val();
+			sfconn.secureToken=$('#'+sfconnId).find("input[name='secureToken']").val();
+			sfconn.conn_env=$('#'+sfconnId).find("select[name='endpoint']").val();
+			$.post('/sfconn/validate',{
+				sfconn:sfconn
+			}).done(function(data){
+				console.log(data);
+				if('validate'==data){
+					$('#'+sfconnId).find('.validInfo').css('display','block');
+					$('#'+sfconnId).find('.unValideInfo').css('display','none');
+				}else{
+					$('#'+sfconnId).find('.validInfo').css('display','none');
+					$('#'+sfconnId).find('.unValideInfo').css('display','block');
+				}
+			});
+		});
+		$("#"+sfconnId).prev().find('.sfchangeSet').bind('click',function(){
+			sfconn.name=$('#'+sfconnId).find("input[name='connName']").val();
+			sfconn.username=$('#'+sfconnId).find("input[name='username']").val();
+			sfconn.password=$('#'+sfconnId).find("input[name='password']").val();
+			sfconn.secureToken=$('#'+sfconnId).find("input[name='secureToken']").val();
+			sfconn.conn_env=$('#'+sfconnId).find("select[name='endpoint']").val();
+			$.post('/sfconn/validate',{
+				sfconn:sfconn
+			}).done(function(data){
+				if('validate'==data){
+					window.open("/sfconn/"+sfconnId,"_self");
+				}else{
+					$('#'+sfconnId).find('.unValideInfo').css('display','block');
+					$("#"+sfconnId).modal('show');
+				}
+			});
+		});
+		$("#"+sfconnId).prev().find('.sffileSync').bind('click',function(){
+			sfconn.name=$('#'+sfconnId).find("input[name='connName']").val();
+			sfconn.username=$('#'+sfconnId).find("input[name='username']").val();
+			sfconn.password=$('#'+sfconnId).find("input[name='password']").val();
+			sfconn.secureToken=$('#'+sfconnId).find("input[name='secureToken']").val();
+			sfconn.conn_env=$('#'+sfconnId).find("select[name='endpoint']").val();
+			$.post('/sfconn/validate',{
+				sfconn:sfconn
+			}).done(function(data){
+				if('validate'==data){
+					$.post('/sfconn/'+sfconnId+'/syncFile');
+				}else{
+					$('#'+sfconnId).find('.unValideInfo').css('display','block');
+					$("#"+sfconnId).modal('show');
+				}
+			});
+		});
+		$("#"+sfconnId).prev().find('.sfconnDelete').bind('click',function(){
+			$.post('/sfconn/'+sfconnId,{_method:'delete'}).done(function(data){
+				if('done' == data){
+					location.reload(true);
+				}
+			});
+		});
+	});
+});

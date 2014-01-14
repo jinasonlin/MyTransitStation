@@ -3,12 +3,12 @@ extends ../layouts/layout-default
 block stylesheet
   link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
 block scripts
-  script(type='text/javascript',src="/js/sfconn/main.js")
+  script(type='text/javascript',src="/js/sfconn/sfmain.js")
 
 block content
   if errMessage
     p #{errMessage}
-  .container.well.well-lg
+  .container.well.well-lg(style="background: #ccc;")
     .page-header
       h1 
         span Salesforce Connections
@@ -19,17 +19,24 @@ block content
     for oriSFConn in SFConnections
       - var sfconnId = oriSFConn.id;
       .row
-        .col-md-6
-          ul.nav.nav-stacked
-            li.active
-              a(href="#")
-                |#{oriSFConn.name}
-                span.badge.pull-right.badge-signIn.sfchangeSet(style="margin-left:2px;")
-                  |Changesets
-                span.badge.badge-edit.pull-right(data-toggle="modal",data-target='#'+sfconnId,style="margin-left:2px;margin-right:2px;")
-                  |Edit
-                span.badge.badge-del.pull-right.sfconnDelete(style="margin-right:2px;")
-                  |Delete
+        .col-md-12.col-sm-12
+          .col-md-5.col-sm-5
+            ul.nav.nav-stacked
+              li.active
+                a(href="#")
+                  |#{oriSFConn.name}
+                  div.pull-right
+                    span.badge.badge-del.sfconnDelete(style="margin-right:2px;")
+                      |Delete
+                    span.badge.badge-edit(data-toggle="modal",data-target='#'+sfconnId,style="margin-left:2px;margin-right:2px;")
+                      |Edit
+                    span.badge.badge-signIn.sfchangeSet(style="margin-left:2px;")
+                      |Changesets
+                    span.badge.badge-signIn.sffileSync(style="margin-left:4px;")
+                      |SyncFiles
+          .col-md-7.col-sm-7(style="margin-top: 10px;")
+            p
+              |SyncFileStatus : #{oriSFConn.syncFileStatus} , lastFileSyncDate : #{oriSFConn.lastFileSyncDate}
         .modal.fade(id=sfconnId,tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
           .modal-dialog
             .modal-content
@@ -40,7 +47,6 @@ block content
               .modal-body
                 form.form-horizontal.sfconnEditForm(role="form",action="/sfconn/"+sfconnId,method="post")
                   input(type="hidden",value="put",name="_method")
-                  input(type="hidden",value="#{oriSFConn.createdBy}")
                   .form-group
                     label.col-sm-3.control-label E-mail 
                     .col-sm-8
@@ -71,49 +77,4 @@ block content
                     .col-sm-offset-3.col-sm-8(style="text-align: right;")
                       button.connValidate.btn.btn-warning(type="button",style="margin-right: 10px;") Validate
                       button.btn.btn-primary(type="submit",style="margin-right: 10px;") Save
-  #newSFConnPanel.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
-    .modal-dialog
-      .modal-content
-        .modal-header
-          button.close(type="button",data-dismiss="modal",aria-hidden="true") &times;
-          h4.modal-title SFConnection 
-            small New
-        .modal-body
-          form#newSFConn.form-horizontal(role="form",action="/sfconn",method="post")
-            .form-group
-              label.col-sm-3.control-label(for="inputEmail") E-mail 
-              .col-sm-8
-                input#inputEmail.form-control(name="username",type="email",placeholder="Username") 
-            .form-group
-              label.col-sm-3.control-label(for="connName") SFConn Name
-              .col-sm-8
-                input#connName.form-control(name="connName",type="text",placeholder="Connection Name")
-            .form-group
-              label.col-sm-3.control-label(for="inputPassword") Password 
-              .col-sm-8
-                input#inputPassword.form-control(name="password",type="password",placeholder="Password")
-            .form-group
-              label.col-sm-3.control-label(for="inputSecurToken") Secure Token 
-              .col-sm-8
-                input#inputSecurToken.form-control(name="secureToken",type="password",placeholder="Secure Token")
-            .form-group
-              label.col-sm-3.control-label(for="inputSelect") ENV 
-              .col-sm-8
-                select#inputSelect.form-control(name="endpoint")
-                  option.form-control(value="test.salesforce.com") sandbox
-                  option.form-control(value="login.salesforce.com") production
-            .form-group
-              .col-sm-8.col-sm-offset-3
-                .checkbox
-                  label 
-                    input#isStore(type="checkbox",name="isStore") 
-                    p
-                      |Remenber This Connection
-            .form-group
-              .validInfo.alert.alert-success.col-sm-8.col-sm-offset-3(style='display:none;').
-                  You org connects well.
-              .unValideInfo.alert.alert-danger.col-sm-8.col-sm-offset-3(style='display:none;').
-                  Can't connect to Salesforce.Please check your input infos.
-              .col-sm-offset-3.col-sm-8(style="text-align: right;")
-                button.connValidate.btn.btn-warning(type="button",style="margin-right: 10px;") Validate
-                button.btn.btn-primary(type="submit",form="newSFConn",style="margin-right: 10px;") Save
+  include newSFConn

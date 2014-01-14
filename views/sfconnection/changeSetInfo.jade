@@ -1,0 +1,109 @@
+extends ../layouts/layout-default
+
+block stylesheet
+  link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
+
+block scripts
+  script(type='text/javascript',src="/js/libs/spin.js")
+  script(type='text/javascript',src="/js/libs/spin.jquery.js")
+  script(type='text/javascript',src="/js/sfconn/changeSetInfo.js")
+
+block content
+  input#sfconnId(type="hidden",value="#{sfconn._id}")
+  input#csId(type="hidden",value="#{changeSet._id}")
+  .container
+    .panel
+      .panel-heading 
+        .col-md-10
+          h2.pull-left #{title}
+            small (#{sfconn.username})
+          button.btn.btn-warning.btn-xs(style="margin-top: 30px;margin-left: 4px;",onclick="window.open('/sfconn/logout','_self');")
+            span.glyphicon.glyphicon-remove-sign(style="margin-right: 5px;")
+            |Log out
+      .panel-body
+        .row
+          .row 
+            .col-md-4
+              h4 Files
+                if changeSet.archiveStatus=='block'
+                  button.btn.btn-xs.btn-warning(type="button",style="margin-left:4px;",disabled=true) Edit
+                    em (Archived . You can't edit this ChangeSet files.)
+                else
+                  button.btn.btn-xs.btn-info(type="button",style="margin-left:4px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
+            .col-md-7.pull-right(style="padding-top: 3px;text-align:center;")
+              if changeSet.archiveStatus=='block'
+                button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="The last archive action in processing.") Archive
+              else
+                button.btn.btn-sm.btn-info.archive(type="button",style="margin-left:4px;") Archive
+              if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
+                button.btn.btn-sm.btn-info.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Validate
+                button.btn.btn-sm.btn-info.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Deploy
+              else
+                button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Validate
+                button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Deploy
+          .row.alert(style="display:none;")
+          hr
+          .row.block-body
+            ul.list-unstyled
+              for fileInfo in changeSet.files
+                li(ref="#{fileInfo.packName}",mode="pack") 
+                  h5 #{fileInfo.packName}
+                    button.btn-xs.btn.controlBtn.controlFold(type="button",style="margin-left:4px;")
+                      span.glyphicon.glyphicon-chevron-right
+                    em(style="margin-left: 4px;") contains #{fileInfo.files.length} files
+                  for fileName in fileInfo.files
+                    li(style="margin-left:15px;display:none;",ref="#{fileInfo.packName}",mode="file") 
+                      em #{fileName}
+        .row 
+          .row
+            .col-md-3
+              h4 Archives
+          hr
+          .row.block-body
+            if archives
+              .col-md-7 
+                ul.list-unstyled
+                  for archive in archives
+                    li(id="#{archive._id}",style="margin:2px;") 
+                      span #{archive.name}
+                      if archive.validateStatus!='block'&&archive.deployStatus!='block'
+                        button.btn.btn-xs.btn-info.bakvalidate(style="margin-left: 6px;") Validate
+                        button.btn.btn-xs.btn-info.bakdeploy(style="margin-left: 6px;") Deploy
+                      else
+                        button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Validate
+                        button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Deploy
+                      
+            else 
+              .col-md-7 No Data.
+        .row 
+          .row
+            .col-md-3
+              h4 Validates
+          hr
+          .row.block-body
+            if validates
+              .col-md-7 
+                ul.list-unstyled
+                  for validate in validates
+                    li(id="#{validate._id}",style="margin:2px;")
+                      span #{validate.name}
+            else 
+              .col-md-7 No Data.
+        .row 
+          .row
+            .col-md-3
+              h4 Deploys
+          hr
+          .row.block-body
+            if deploys
+              .col-md-7 Data.
+            else 
+              .col-md-7 No Data.
+        .row 
+          .row
+            .col-md-3
+              h4 History
+          hr
+          .row.block-body
+            .col-md-7(style="height: 150px;overflow: auto;") #{changeSet.historyLog}
+  include newSFConn

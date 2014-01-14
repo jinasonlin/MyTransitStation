@@ -1,8 +1,10 @@
 var userAuthFilter = require("./filter/userAuthFilter")
   , user = require('./controller/user')
   , sfconnManager = require("./controller/sfconnManager")
+  , changeSetManager = require("./controller/changeSetManager")
   , adminAuthFilter = require("./filter/adminAuthFilter")
-  , admin = require('./controller/admin');
+  , admin = require('./controller/admin')
+  , test = require('./controller/test');
 
 module.exports = function(app) {
   // user login
@@ -19,12 +21,20 @@ module.exports = function(app) {
   app.get("/sfconn/:sfconnId",sfconnManager.listSFConnInfo);
   app.put("/sfconn/:sfconnId",sfconnManager.updateSFConn);
   app.delete("/sfconn/:sfconnId",sfconnManager.deleteSFConn);
-
+  
+  app.post("/sfconn/:sfconnId/syncFile",sfconnManager.syncFile);
+  app.all("/sfconn/:sfconnId/*",userAuthFilter.checkSFConnLoggedin);
   app.get("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetInit);
-  app.post("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetNew);
+  app.post("/sfconn/:sfconnId/changeSets",sfconnManager.changeSetSave);
   app.get("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetInfo);
-  app.put("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetEdit);
   app.delete("/sfconn/:sfconnId/changeSets/:changeSetId",sfconnManager.changeSetDelete);
+
+  // todo: determine if these still need, if not we then remove them
+  app.post("/changeSets/:changeSetId/archives",changeSetManager.addArchive);
+  app.post("/changeSets/:changeSetId/validate",changeSetManager.addValidation);
+  app.post("/changeSets/:changeSetId/deploy",changeSetManager.addDeployment);
+
+  app.get("/test",test.testDeploy);
 
   // admin login
   app.get("/admin", adminAuthFilter.redirectToHomePageIfAlreadyLoggedIn, admin.showloginForm);

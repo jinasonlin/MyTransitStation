@@ -4,24 +4,52 @@ block stylesheet
   link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
 
 block scripts
-  script(type='text/javascript',src="/js/sfconn/main.js")
+  script(type='text/javascript',src="/js/libs/spin.js")
+  script(type='text/javascript',src="/js/libs/spin.jquery.js")
+  script(type='text/javascript',src="/js/sfconn/sfconnInfo.js")
 
 block content
+  input#sfconnId(type="hidden",value="#{sfconn._id}")
   .container
     .panel
       .panel-heading 
         .col-md-10
-          h2.pull-left #{title} | #{sfconn.name}
+          h2.pull-left #{title}
+            small (#{sfconn.username})
           button.btn.btn-warning.btn-xs(style="margin-top: 30px;margin-left: 4px;",onclick="window.open('/sfconn/logout','_self');")
             span.glyphicon.glyphicon-remove-sign(style="margin-right: 5px;")
             |Log out
       .panel-body
         .row
-          .col-md-10
-            .row
-              .col-md-4
-                h4.pull-left Changesets
-                button.btn.btn-info.btn-xs(style="margin-top: 9px;margin-left: 6px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets','_self');")
-                  span.glyphicon.glyphicon-plus 
-                  |New
-              .col-md-8
+          .col-md-4
+            h4.pull-left Changesets
+            button.btn.btn-info.btn-xs(style="margin-top: 9px;margin-left: 6px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets','_self');")
+              span.glyphicon.glyphicon-plus 
+              |New
+        .row.alert(style="display:none;")
+        .row
+          table.table.table-hover.table-bordered
+            thead
+             tr 
+               th ChangeSet Name
+               th Created By
+               th Created Date
+               th Actions
+            tbody
+              for changeSet in changeSets
+                tr(id="#{changeSet._id}")
+                  td 
+                    a(href="#",onclick="window.open('/sfconn/#{sfconn._id}/changeSets/#{changeSet._id}','_self')") #{changeSet.name}
+                  td #{user.username}
+                  td #{changeSet.createdDate}
+                  td
+                    button.btn.btn-xs.btn-warning.delete(type="button") Delete
+                    if changeSet.archiveStatus=='block'
+                      button.btn.btn-xs.btn-warning(style="margin-left:6px;",type="button",title="Archived . You can't edit this ChangeSet files.") Edit
+                    else
+                      button.btn.btn-xs.btn-info(style="margin-left:6px;",type="button",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
+                    button.btn.btn-xs.btn-info.archive(style="margin-left:6px;",type="button") Archive
+                    if changeSet.deployStatus=='inProgress'
+                      button.btn.btn-xs.btn-warning.deploy(style="margin-left:6px;",type="button",title="Deploy is processing . You cant't deploy this ChangeSet at the same time.") Deploy
+                    else
+                      button.btn.btn-xs.btn-info.deploy(style="margin-left:6px;",type="button") Deploy

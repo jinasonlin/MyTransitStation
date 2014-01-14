@@ -1,0 +1,55 @@
+script(type='text/javascript',src="/js/sfconn/newSFConn.js")
+
+#newSFConnPanel.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type="button",data-dismiss="modal",aria-hidden="true") &times;
+          h4.modal-title SFConnection 
+            if changeSet
+              small New
+                em (You must validate your SFDC org before submit the form.)
+            else
+              small New
+        .modal-body
+          form#newSFConn.form-horizontal(role="form",action="/sfconn",method="post")
+            .form-group
+              label.col-sm-3.control-label(for="inputEmail") E-mail 
+              .col-sm-8
+                input#inputEmail.form-control(name="username",type="email",placeholder="Username") 
+            .form-group
+              label.col-sm-3.control-label(for="connName") SFConn Name
+              .col-sm-8
+                input#connName.form-control(name="connName",type="text",placeholder="Connection Name")
+            .form-group
+              label.col-sm-3.control-label(for="inputPassword") Password 
+              .col-sm-8
+                input#inputPassword.form-control(name="password",type="password",placeholder="Password")
+            .form-group
+              label.col-sm-3.control-label(for="inputSecurToken") Secure Token 
+              .col-sm-8
+                input#inputSecurToken.form-control(name="secureToken",type="password",placeholder="Secure Token")
+            .form-group
+              label.col-sm-3.control-label(for="inputSelect") ENV 
+              .col-sm-8
+                select#inputSelect.form-control(name="endpoint")
+                  option.form-control(value="test.salesforce.com") sandbox
+                  option.form-control(value="login.salesforce.com") production
+            if changeSet
+              input(type="hidden",name="csId",value="#{changeSet._id}")
+              input#triggle-name(type="hidden",name="triggleName",value="")
+              .form-group
+                .col-sm-8.col-sm-offset-3
+                  .checkbox
+                    label 
+                      input#isStore(type="checkbox",name="isStore") 
+                      p
+                        |Remenber This Connection
+            .form-group
+              .validInfo.alert.alert-success.col-sm-8.col-sm-offset-3(style='display:none;').
+                  You org connects well.
+              .unValideInfo.alert.alert-danger.col-sm-8.col-sm-offset-3(style='display:none;').
+                  Can't connect to Salesforce.Please check your input infos.
+              .col-sm-offset-3.col-sm-8(style="text-align: right;")
+                button.connValidate.btn.btn-warning(type="button",style="margin-right: 10px;") Validate
+                button.newSFConnSave.btn.btn-primary(type="submit",form="newSFConn",style="margin-right: 10px;") Submit

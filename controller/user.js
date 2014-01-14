@@ -6,6 +6,7 @@ exports.showloginForm = function(req, res) {
 };
 
 exports.login = function(req, res) {
+  console.log(req.body);
   User.findOne({
     username: req.param("username", ""),
     password: encrypService.generateHashPassword(req.param("password", ""))
