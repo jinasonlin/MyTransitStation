@@ -1,0 +1,28 @@
+extends ../layouts/layout-default
+
+block stylesheet
+  link(rel="stylesheet", href="/styles/admin.css", type="text/css")
+
+block content
+  div(class="container")
+    h1 Welcome to Salesforce Migration Tool! (Admin Console)
+    div(class="row")
+      div(class="col-sm-6")
+        form(method="post", action="admin/login", class="form-horizontal", role="form")
+          input(type="hidden", value="get", name="_method")
+          div(class="form-group")
+            label(for="inputUsername", class="col-sm-2 control-label") Username
+            div(class="col-sm-6")
+              input(type="text", class="form-control", id="inputUsername", name="username", placeholder="Username")
+          div(class="form-group")
+            label(for="inputPassword", class="col-sm-2 control-label") Password
+            div(class="col-sm-6")
+              input(type="password", class="form-control", id="inputPassword", name="password", placeholder="Password")
+          div(class="form-group")
+            div(class="col-sm-offset-2 col-sm-6")
+              div(class="checkbox")
+                label Remember me
+                  input(type="checkbox")
+          div(class="form-group")
+            div(class="col-sm-offset-2 col-sm-6")
+              input(type="submit", class="btn btn-default") Sign in

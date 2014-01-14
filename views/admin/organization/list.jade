@@ -1,0 +1,39 @@
+extends ../../layouts/layout-default
+
+block stylesheet
+  link(rel="stylesheet", href="/styles/admin.css", type="text/css")
+
+block scripts
+  script(type="text/javascript",src="/js/organization/list.js")
+
+block content
+  div(class="container")
+    h1 Salesforce Migration Tool Admin Console - Organization List
+    div(class="row")
+      div(class="col-sm-6")
+        <button type="button" class="btn btn-default btn-xs" id="newBtn">New</button>
+    div(class="row")
+      div(class="col-sm-12")
+        table(class="table table-striped table-hover")
+          thead
+            tr
+              th #
+              th Name
+              th Description
+              th Default Org Admin
+              th Created Date
+              th Created By
+              th Action
+          tbody
+          for org in orgs
+            tr(class="js-org", data-org-id="#{org._id}")
+              td 1
+              td #{org.name}
+              td #{org.description}
+              td #{org.defaultAdminUserId}
+              td #{org.createdDate}
+              td #{org.createdBy}
+              td
+                <button type="button" class="btn btn-default btn-xs">View</button>
+                <button type="button" class="btn btn-default btn-xs">Edit</button>
+                <button type="button" class="btn btn-default btn-xs js-delBtn">Del</button>

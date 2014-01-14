@@ -3,9 +3,9 @@ extends ../layouts/layout-default
 block content
   div(class="container")
     h1 Welcome to Salesforce Migration Tool!
-    div(class="row")
+    div(class="row", style="margin-top: 20px;")
       div(class="col-sm-6")
-        form(method="post", action="user/login", class="form-horizontal", role="form", style="margin-top: 20px;")
+        form(method="post", action="user/login", class="form-horizontal", role="form")
           input(type="hidden", value="get", name="_method")
           div(class="form-group")
             label(for="inputUsername", class="col-sm-2 control-label") Username

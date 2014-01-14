@@ -31,8 +31,8 @@ app.use(express.session({
   store: new MongoStore({
     url: uristring,
     auto_reconnect: true
-  })
-  //cookie: {path: '/', maxAge: null}
+  }),
+  cookie: {path: '/', maxAge: null}
 }));
 
 app.configure("production", function() {

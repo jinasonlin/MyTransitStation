@@ -5,7 +5,7 @@ var mongoose = require('mongoose')
   , ObjectId = Schema.ObjectId;
  
 var organizationSchema = new Schema({
-  name: String,
+  name: {type: String, required: true, unique: true},
   description: String,
   defaultAdminUserId: ObjectId,
   createdDate: {type: Date, default: Date.now},
