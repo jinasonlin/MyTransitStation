@@ -17,3 +17,7 @@
 .panel-body .block-body{
 	margin-left: 30px;
 }
+.container{
+	border:1px solid #ccc;
+	min-height: 600px;
+}

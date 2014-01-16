@@ -1,0 +1,38 @@
+script(type='text/javascript',src="/js/sfconn/sfconn-select.js")
+
+#sfconn-select.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
+  .modal-dialog(style="width:500px;")
+    .modal-content
+      .modal-header
+        button.close(type="button",data-dismiss="modal",aria-hidden="true") &times;
+        h4.modal-title Please select.
+      .modal-body
+        .row  
+          .col-sm-3.col-md-3.col-sm-offset-1.col-md-offset-1(style="padding-top: 6px;")
+            label.control-label.pull-right Name 
+          .col-sm-6.col-md-6
+            input.name.form-control(type="text",placeholder="Name")
+        .row(style="margin-top:10px;")
+          .col-sm-3.col-md-3.col-sm-offset-1.col-md-offset-1
+            label.control-label.pull-right SFConnection 
+          .col-sm-7.col-md-7.choosedSFConn None Choosed
+        .row
+          .col-sm-7.col-sm-offset-4.col-md-7.col-md-offset-4 
+            if sfconns && sfconns.length>0
+              ul.list-unstyled
+                for sfconn in sfconns
+                  - var sfconnENVType = sfconn.conn_env == 'test.salesforce.com' ? 'sandbox' : 'production';
+                  li
+                    .radio
+                      label
+                        input.sfconnRadio(type="radio") 
+                        |#{sfconn.name}
+                        em (#{sfconn.username} | 
+                          =sfconnENVType
+                          )
+            else
+              No Data.
+        .row
+          .col-sm-5.col-md-5.pull-right.col-sm-offset-7.col-md-offset-7
+            a.btn.btn-sm.btn-warning Validate
+            a.btn.btn-sm.btn-info(disabled=true,style="margin-left:6px;") Submit

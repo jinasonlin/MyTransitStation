@@ -265,24 +265,31 @@ exports.updateDeploymentStatus = function(deploymentId,status){
 exports.checkCSArchiveStatus = function(csId,callback){
 	Archive.find({changeSetId:csId},function(err,archives){
         if(archives){
-            var isBreak = false;
-            for(var i=0;i<archives.length;i++){
-                var archive = archives[i];
-                if(archive.status == 'inProcess'){
-                    ChangeSet.findByIdAndUpdate(csId,{archiveStatus:'block'},function(err){
-                        if(err)callback(err);
-                        else callback(null);
-                    });
-                    isBreak=true;
-                    break;
-                }
-            }
-            if(!isBreak){
-                ChangeSet.findByIdAndUpdate(csId,{archiveStatus:'none'},function(err){
+        	if(archives.length>0){
+        		var isBreak = false;
+	            for(var i=0;i<archives.length;i++){
+	                var archive = archives[i];
+	                if(archive.status == 'inProcess'){
+	                    ChangeSet.findByIdAndUpdate(csId,{archiveStatus:'block'},function(err){
+	                        if(err)callback(err);
+	                        else callback(null);
+	                    });
+	                    isBreak=true;
+	                    break;
+	                }
+	            }
+	            if(!isBreak){
+	                ChangeSet.findByIdAndUpdate(csId,{archiveStatus:'none'},function(err){
+	                    if(err)callback(err);
+	                    else callback(null);
+	                });
+	            }
+        	}else{
+        		ChangeSet.findByIdAndUpdate(csId,{archiveStatus:'done'},function(err){
                     if(err)callback(err);
                     else callback(null);
                 });
-            }
+        	}
         }
     });
 };

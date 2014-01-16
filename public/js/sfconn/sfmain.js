@@ -15,7 +15,6 @@ $(document).ready(function(){
 			$.post('/sfconn/validate',{
 				sfconn:sfconn
 			}).done(function(data){
-				console.log(data);
 				if('validate'==data){
 					$('#'+sfconnId).find('.validInfo').css('display','block');
 					$('#'+sfconnId).find('.unValideInfo').css('display','none');
@@ -25,7 +24,7 @@ $(document).ready(function(){
 				}
 			});
 		});
-		$("#"+sfconnId).prev().find('.sfchangeSet').bind('click',function(){
+		$("tr[ref='"+sfconnId+"']").find('.sfconn-cs').bind('click',function(){
 			sfconn.name=$('#'+sfconnId).find("input[name='connName']").val();
 			sfconn.username=$('#'+sfconnId).find("input[name='username']").val();
 			sfconn.password=$('#'+sfconnId).find("input[name='password']").val();
@@ -42,7 +41,7 @@ $(document).ready(function(){
 				}
 			});
 		});
-		$("#"+sfconnId).prev().find('.sffileSync').bind('click',function(){
+		$("tr[ref='"+sfconnId+"']").find('.sfconn-sf').bind('click',function(){
 			sfconn.name=$('#'+sfconnId).find("input[name='connName']").val();
 			sfconn.username=$('#'+sfconnId).find("input[name='username']").val();
 			sfconn.password=$('#'+sfconnId).find("input[name='password']").val();
@@ -59,10 +58,10 @@ $(document).ready(function(){
 				}
 			});
 		});
-		$("#"+sfconnId).prev().find('.sfconnDelete').bind('click',function(){
+		$("tr[ref='"+sfconnId+"']").find('.sfconn-del').bind('click',function(){
 			$.post('/sfconn/'+sfconnId,{_method:'delete'}).done(function(data){
 				if('done' == data){
-					location.reload(true);
+					window.open("/sfconn","_self");
 				}
 			});
 		});

@@ -11,21 +11,18 @@ block scripts
 block content
   input#sfconnId(type="hidden",value="#{sfconn._id}")
   input#csId(type="hidden",value="#{changeSet._id}")
-  .container.well.well-lg
+  .container
     .panel
       .panel-heading 
         .col-md-10
           h2.pull-left #{title}
             small (#{sfconn.username})
-          button.btn.btn-warning.btn-xs(style="margin-top: 30px;margin-left: 4px;",onclick="window.open('/sfconn/logout','_self');")
-            span.glyphicon.glyphicon-remove-sign(style="margin-right: 5px;")
-            |Log out
       .panel-body
         .row
           .row 
             .col-md-4
               h4 Files
-                if changeSet.archiveStatus=='block'
+                if changeSet.archiveStatus == 'block'
                   button.btn.btn-xs.btn-warning(type="button",style="margin-left:4px;",disabled=true) Edit
                     em (Archived . You can't edit this ChangeSet files.)
                 else
@@ -36,8 +33,8 @@ block content
               else
                 button.btn.btn-sm.btn-primary.archive(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-name") Archive
               if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
-                button.btn.btn-sm.btn-primary.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Validate
-                button.btn.btn-sm.btn-primary.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#newSFConnPanel") Deploy
+                button.btn.btn-sm.btn-primary.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-select") Validate
+                button.btn.btn-sm.btn-primary.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-select") Deploy
               else
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Validate
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Deploy
@@ -62,22 +59,26 @@ block content
           .row.alert.archive-alert(style="display:none;")
           .row.block-body
             if archives && archives.length>0
-              .col-md-7
-                table.table.table-condensed
+              .col-md-9
+                table.table.table-condensed.table-hover
                   thead
                     tr
                       th Archive Name
+                      th Created Date
                       th Status
                       th Action
                   tbody
                     for archive in archives
+                      - var createdDate = moment(archive.createdDate).format('YYYY-MM-DD HH:mm:ss');
                       tr(id="#{archive._id}")
                         td 
                           a(href="/archive/#{archive._id}")
                             |#{archive.name}
                         td 
-                          if archive.status=='new'
-                            |Queued
+                          = createdDate
+                        td 
+                          if archive.status=='new'||archive.status=='inProcess'
+                            i(title="Processing").icon-large.icon-spinner.icon-spin
                           else 
                             |#{archive.status}
                         td 
@@ -106,22 +107,26 @@ block content
           .row.alert.validate-alert(style="display:none;")
           .row.block-body
             if validates && validates.length>0
-              .col-md-7 
+              .col-md-9 
                 table.table.table-condensed
                   thead
                     tr
                       th Validation Name
+                      th Created Date
                       th Status
                       th Action
                   tbody
                     for validate in validates
+                      - var createdDate = moment(validate.createdDate).format('YYYY-MM-DD HH:mm:ss');
                       tr(id="#{validate._id}")
                         td 
                           a(href="/validation/#{validate._id}")
                             |#{validate.name}
                         td
-                          if validate.status=='new'
-                            |Queued
+                          = createdDate
+                        td
+                          if validate.status=='new'||validate.status=='inProcess'
+                            i(title="Processing").icon-large.icon-spinner.icon-spin
                           else 
                             |#{validate.status}
                         td
@@ -140,22 +145,26 @@ block content
           .row.alert.deploy-alert(style="display:none;")
           .row.block-body
             if deploys && deploys.length>0
-              .col-md-7 
+              .col-md-9 
                 table.table.table-condensed
                   thead
                     tr
                       th Deployment Name
+                      th Created Date
                       th Status
                       th Action
                   tbody
                     for deploy in deploys
+                      - var createdDate = moment(deploy.createdDate).format('YYYY-MM-DD HH:mm:ss');
                       tr(id="#{deploy._id}")
                         td 
                           a(href="/deployment/#{deploy._id}")
                             |#{deploy.name}
                         td
-                          if deploy.status=='new'
-                            |Queued
+                          = createdDate
+                        td
+                          if deploy.status=='new'||deploy.status=='inProcess'
+                            i(title="Processing").icon-large.icon-spinner.icon-spin
                           else 
                             |#{deploy.status}
                         td
@@ -168,3 +177,5 @@ block content
               .col-md-7 No Data.
   include newSFConn
   include single-name
+  include single-select
+  include sfconn-select

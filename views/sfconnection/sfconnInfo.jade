@@ -10,15 +10,12 @@ block scripts
 
 block content
   input#sfconnId(type="hidden",value="#{sfconn._id}")
-  .container.well.well-lg
+  .container
     .panel
       .panel-heading 
         .col-md-10
           h2.pull-left #{title}
             small (#{sfconn.username})
-          button.btn.btn-warning.btn-xs(style="margin-top: 30px;margin-left: 4px;",onclick="window.open('/sfconn/logout','_self');")
-            span.glyphicon.glyphicon-remove-sign(style="margin-right: 5px;")
-            |Log out
       .panel-body
         .row
           .col-md-4
@@ -29,7 +26,7 @@ block content
         hr
         .row.alert(style="display:none;")
         if changeSets && changeSets.length>0
-          .row
+          .row(style="margin:0;")
             table.table.table-hover.table-bordered
               thead
                tr 
@@ -39,11 +36,13 @@ block content
                  th Action
               tbody
                 for changeSet in changeSets
+                  - var createdDate = moment(changeSet.createdDate).format('YYYY-MM-DD HH:mm:ss');
                   tr(id="#{changeSet._id}")
                     td 
                       a(href="#",onclick="window.open('/sfconn/#{sfconn._id}/changeSets/#{changeSet._id}','_self')") #{changeSet.name}
                     td #{user.username}
-                    td #{changeSet.createdDate}
+                    td 
+                      = createdDate
                     td
                       button.btn.btn-xs.btn-warning.delete(type="button") Delete
                       if changeSet.archiveStatus=='block'

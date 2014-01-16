@@ -6,12 +6,13 @@ var nodeforce = require("../lib/nodeforce"),
 	Deployment = require("../model/deployment"),
  	async = require("async"),
  	Moment = require("moment"),
- 	changeSetService = require('../service/changesetservice');
+ 	changeSetService = require('../service/changesetservice'),
+ 	commonservice = require('../service/commonservice');
 
  	Moment.lang('en_gb');
- 	var datefmt = 'YYYY-MM-DD HH:mm:ss';
 
 exports.listSFConn = function(req,res){
+	var errMessage = req.query.errMessage;
 	SFConnection.find({createdBy: req.session.user._id,sfconntype : 'normal'},
 		'-fileInfo', 
 		{sort : {name : 'asc'}},
@@ -20,12 +21,14 @@ exports.listSFConn = function(req,res){
 			res.render('sfconnection/sfconnManage',{
 				err:err,
 				title : 'SFConnection',
-				SFConnections:[]
+				SFConnections:[],
+				errMessage : errMessage||''
 			});
 		}else {
 			res.render('sfconnection/sfconnManage',{
 				SFConnections:SFConnections,
-				title : 'SFConnection'
+				title : 'SFConnection',
+				errMessage : errMessage||''
 			});
 		}
 	})
@@ -136,7 +139,7 @@ exports.listSFConnInfo = function(req,res){
 						});
 	    			});
 	    		} else {
-			      res.redirect("/sfconn?errMessage=Login failed, please check your SFConnection username and password!");
+			      res.redirect("/sfconn?errMessage=Login with "+docs.name+" failed, please check your SFConnection username and password!");
 			    }
 	  		});
 		}else{
@@ -178,6 +181,7 @@ exports.validateSFConn = function(req,res){
 
 exports.logoutSFConn = function(req,res){
 	global.sfclient = undefined;
+	global.sfconn = undefined;
 	res.redirect('/sfconn');
 }
 
@@ -343,6 +347,16 @@ exports.changeSetInfo = function(req,res){
 					Deployment.find({changeSetId:req.params.changeSetId},'',{sort:{createdDate:'desc'}},function(err,deployments){
 						callback(null,deployments||[]);
 					});
+				},function(callback){
+					SFConnection.find({
+						createdBy : req.session.user._id,
+						_id : {
+							$ne : global.sfconn._id
+						},
+						sfconntype : 'normal'
+					},'-fileInfo',{sort:{name:'asc'}},function(err,sfconns){
+						callback(null,sfconns||[])
+					});
 				}],function(err,results){
 					res.render('sfconnection/changeSetInfo',{
 						title : 'ChangeSet | '+docs.name,
@@ -350,7 +364,8 @@ exports.changeSetInfo = function(req,res){
 						sfconn : global.sfclient,
 						archives : results[0],
 						validates : results[1],
-						deploys : results[2] 
+						deploys : results[2] ,
+						sfconns : results[3]
 					});
 				});
 			}else{
@@ -370,7 +385,6 @@ exports.syncFile = function(req,res){
 }
 
 function syncSFConnFile(sfconnId){
-	console.log('begin to sync file of sfconn(id : '+sfconnId+')');
 	SFConnection.findById(sfconnId,function(err,docs){
 		if(!err){
 			var sfclient = nodeforce.createClient({
@@ -381,6 +395,7 @@ function syncSFConnFile(sfconnId){
 	  		sfclient.login(function(err, response, lastRequest) {
 	    		if (sfclient.userId) {
 	    			if('InProgress' != docs.syncFileStatus){
+	    				console.log('begin to sync file of sfconn(id : '+sfconnId+')');
 	    				docs.update({
 		    				syncFileStatus : 'InProgress'
 		    			},function(err){
