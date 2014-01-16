@@ -1,5 +1,5 @@
 
-.row(style="border-bottom: 1px solid #ccc;margin-bottom: 6px;")
+.row(style="border-bottom: 1px solid #ccc;margin-bottom: 6px;min-width:980px;")
   .col-sm-8.col-md-8.col-sm-offset-1.col-md-offset-1
     p
       h1 Welcome to Salesforce Migration Tool!
@@ -8,5 +8,4 @@
       span Welcome ,&nbsp; 
         a
           |#{sessionUser.username}
-      a(href="/user/logout") 
-        button.btn.btn-info.btn-xs Sign out
+      a.btn.btn-info.btn-xs(href="/user/logout",style="margin-left:6px;") Sign out
