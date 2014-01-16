@@ -4,9 +4,9 @@
     p
       h1 Welcome to Salesforce Migration Tool!
   .col-sm-2.col-md-2(style="margin-top: 40px;")
-    if user
+    if sessionUser
       span Welcome ,&nbsp; 
         a
-          |#{user.username}
+          |#{sessionUser.username}
       a(href="/user/logout") 
         button.btn.btn-warning.btn-xs Sign out

@@ -11,7 +11,7 @@ var userSchema = new Schema({
   type: {type: String, required: true},
   firstname: String,
   lastname: String,
-  orgnizationId: ObjectId,
+  organizationId: ObjectId,
   createdDate: {type: Date, default: Date.now},
   createdBy: ObjectId
 });

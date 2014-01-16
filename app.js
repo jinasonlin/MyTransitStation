@@ -35,7 +35,7 @@ app.use(express.session({
   cookie: {path: '/', maxAge: null}
 }));
 app.use(function(req,res,next){
-  res.locals.user = req.session.user;
+  res.locals.sessionUser = req.session.user;
   next();
 });
 
