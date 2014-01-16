@@ -6,9 +6,7 @@ block scripts
   script(type='text/javascript',src="/js/sfconn/sfmain.js")
 
 block content
-  if errMessage
-    p #{errMessage}
-  .container.well.well-lg
+  .container
     .page-header
       h2 
         span Salesforce Connections
@@ -16,32 +14,42 @@ block content
           span.glyphicon.glyphicon-plus-sign
           span(style="margin-left:6px;")
             |New connection
-    for oriSFConn in SFConnections
-      - var sfconnId = oriSFConn.id;
-      .row
-        .col-md-12.col-sm-12
-          .col-md-5.col-sm-5
-            ul.nav.nav-stacked
-              li.active
-                a(href="#")
-                  |#{oriSFConn.name}
-                  div.pull-right
-                    span.badge.badge-del.sfconnDelete(style="margin-right:2px;")
-                      |Delete
-                    span.badge.badge-edit(data-toggle="modal",data-target='#'+sfconnId,style="margin-left:2px;margin-right:2px;")
-                      |Edit
-                    span.badge.badge-signIn.sfchangeSet(style="margin-left:2px;")
-                      |Changesets
-                    if oriSFConn.syncFileStatus=='InProgress'
-                      span.badge.badge-signIn.sffileSync(style="margin-left:4px;",disabled=true)
-                        |SyncFiles
-                    else
-                      span.badge.badge-signIn.sffileSync(style="margin-left:4px;",disabled=true)
-                        |SyncFiles
-          .col-md-7.col-sm-7(style="margin-top: 10px;")
-            p
-              |SyncFileStatus : #{oriSFConn.syncFileStatus} , lastFileSyncDate : #{oriSFConn.lastFileSyncDate}
-        .modal.fade(id=sfconnId,tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
+    if SFConnections && SFConnections.length>0
+      table.table.table-hover.table-condensed
+        thead
+          th Connection Name
+          th Org Email
+          th Org Type
+          th Action
+          th Last File Sync Date
+          th Created Date
+        tbody
+          for oriSFConn in SFConnections
+            - var createdDate = moment(oriSFConn.createdDate).format('YYYY-MM-DD HH:mm:ss');
+            - var lastFileSyncDate = oriSFConn.lastFileSyncDate != null ? moment(oriSFConn.lastFileSyncDate).format('YYYY-MM-DD HH:mm:ss') : '';
+            tr(ref="#{oriSFConn._id}")
+              td 
+                a(href="/sfconn/#{oriSFConn._id}") #{oriSFConn.name}
+              td #{oriSFConn.username}
+              td 
+                if oriSFConn.conn_env == 'test.salesforce.com'
+                  |sandbox
+                else
+                  |production
+              td
+                a.btn.btn-xs.btn-warning.sfconn-del Delete
+                a(style="margin-left:4px;",data-toggle="modal",data-target="##{oriSFConn._id}").btn.btn-xs.btn-info Edit
+                a(style="margin-left:4px;").btn.btn-xs.btn-primary.sfconn-cs ChangeSets
+                if oriSFConn.syncFileStatus=='InProgress'
+                  a(style="margin-left:4px;",title="FileSync Processing.").btn.btn-xs.btn-warning SyncFiles
+                else
+                  a(style="margin-left:4px;").btn.btn-xs.btn-primary.sfconn-sf SyncFiles
+              td
+                = lastFileSyncDate
+              td
+                = createdDate
+      for oriSFConn in SFConnections
+        .modal.fade(id="#{oriSFConn._id}",tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
           .modal-dialog
             .modal-content
               .modal-header
@@ -49,7 +57,7 @@ block content
                 h4.modal-title SFConnection
                   small &nbsp;Edit
               .modal-body
-                form.form-horizontal.sfconnEditForm(role="form",action="/sfconn/"+sfconnId,method="post")
+                form.form-horizontal.sfconnEditForm(role="form",action="/sfconn/#{oriSFConn._id}",method="post")
                   input(type="hidden",value="put",name="_method")
                   .form-group
                     label.col-sm-3.control-label E-mail 

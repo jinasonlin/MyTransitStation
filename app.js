@@ -18,7 +18,7 @@ mongoose.connect(uristring, function (err, res) {
   }
 });
 
-app.use(logfmt.requestLogger());
+//app.use(logfmt.requestLogger());
 app.set("view engine", "jade");
 app.set("view options", {layout: true});
 app.set("views", __dirname + "/views");
@@ -38,6 +38,7 @@ app.use(function(req,res,next){
   res.locals.sessionUser = req.session.user;
   next();
 });
+app.locals.moment = require('moment');
 
 app.configure("production", function() {
   // Do some production-specific action

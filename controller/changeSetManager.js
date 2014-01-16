@@ -3,7 +3,10 @@ var Archive = require("../model/archive"),
 	Validation = require("../model/validation"),
 	Deployment = require("../model/deployment");
 	Moment = require("moment"),
-	changeSetService = require('../service/changesetservice');
+	changeSetService = require('../service/changesetservice'),
+	commonservice = require('../service/commonservice');
+
+	Moment.lang('en_gb');
 
 exports.addArchive = function(req,res){
 	var csId = req.params.changeSetId;

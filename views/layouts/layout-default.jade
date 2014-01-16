@@ -2,12 +2,28 @@
 html(lang='en')
   head
     title #{title}
+    link(rel='stylesheet', href='/styles/font-awesome.min.css', type='text/css')
     link(rel='stylesheet', href='/styles/bootstrap.css', type='text/css')
+    link(rel='stylesheet', href='/styles/customer.css', type='text/css')
     block stylesheet
     script(type='text/javascript', src="/js/libs/jquery.js")
     script(type='text/javascript', src="/js/libs/bootstrap.js")
     block scripts
   body
     include head
-    block content
+    .row(style="min-width:980px;")
+      .col-md-2.col-sm-4(style="margin-left: 12px;margin-right: -20px;width:272px;")
+        .panel.well(style="min-height:450px;")
+          ul.nav.nav-list
+            li.nav-header 
+              h4 Actions
+            hr(style="margin:0;")
+            li
+              a(href="/sfconn") SFDC Connections
+            if global.sfconn
+              a(href="/sfconn/"+global.sfconn._id,style="margin-left:30px;") #{global.sfconn.name}
+              a(href="/sfconn/logout",style="margin-left:4px;").btn.btn-xs.btn-warning Log out
+      .col-md-8.col-sm-8 
+        include errMessage
+        block content
     include foot

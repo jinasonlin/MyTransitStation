@@ -43,3 +43,7 @@ exports.connect2SFDC = function(sfconn,callback){
 		}
 	});
 };
+
+exports.STATICS = {
+	datefmt : 'YYYY-MM-DD HH:mm:ss'
+};

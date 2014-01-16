@@ -25,6 +25,8 @@ exports.login = function(req, res) {
 };
 
 exports.logout = function(req, res) {
+  global.sfconn = undefined;
+  global.sfclient = undefined;
   req.session.destroy(function(err) {
     res.redirect('/');
   });
