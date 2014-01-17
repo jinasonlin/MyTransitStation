@@ -103,6 +103,7 @@ exports.createOrganization = function(req, res) {
           org.save(function(err, org) {
             if (err) {
               console.log("failed to set default org admin id");
+              res.send({success: false});
             } else {
               console.log("set default org admin successfully");
               res.send({success: true});
@@ -122,11 +123,12 @@ exports.updateOrganization = function(req, res) {
   }, function(err, org) {
     if (err) {
       console.log("failed to update org", err);
+      res.send({success: false});
     } else {
       console.log("org updated");
       res.send({success: true});
     }
-  })
+  });
 };
 
 exports.deleteOrganization = function(req, res) {
@@ -140,6 +142,7 @@ exports.deleteOrganization = function(req, res) {
       Organization.findByIdAndRemove(id, function(err, org) {
         if (err) {
           console.log("failed to delete org " + org._id);
+          res.send({success: false});
         } else {
           console.log("delete org " + org._id + " successfully");
           res.send({success: true});
@@ -156,7 +159,7 @@ exports.editOrganizationUser = function(req, res) {
   if (userId) {
     // edit
     console.log("edit form");
-    User.findOne({organizationId: orgId, _id: userId}, function (err, user) {
+    User.findById(userId, function (err, user) {
       if (err) {
         res.redirect('/admin/organization/' + orgId);
       } else {
@@ -166,7 +169,7 @@ exports.editOrganizationUser = function(req, res) {
   } else {
     // new
     console.log("new form");
-    res.render('admin/user/edit');
+    res.render('admin/user/edit', {orgId: orgId});
   }
 };
 
@@ -174,7 +177,7 @@ exports.viewOrganizationUser = function(req, res) {
   console.log("view org user");
   var orgId = req.params.orgId;
   var userId = req.params.userId;
-  User.findOne({organizationId: orgId, _id: userId}, function (err, user) {
+  User.findById(userId, function (err, user) {
     if (err) {
       res.redirect('/admin/organization/' + orgId);
     } else {
@@ -185,18 +188,56 @@ exports.viewOrganizationUser = function(req, res) {
 };
 
 exports.createOrganizationUser = function(req, res) {
-
+  console.log("create org user");
+  var orgId = req.params.orgId;
+  var user = new User({
+    username: req.param("username", ""),
+    password: encrypService.generateHashPassword(req.param("username", "")),
+    firstname: req.param("firstname", ""),
+    lastname: req.param("lastname", ""),
+    email: req.param("email", ""),
+    type: req.param("type", ""),
+    organizationId: orgId,
+    createdBy: req.session.user._id
+  }).save(function (err, org) {
+    if (err) {
+      console.log("failed to create org user", err);
+      res.send({success: false});
+    } else {
+      res.send({success: true});
+    }
+  });
 };
 
 exports.updateOrganizationUser = function(req, res) {
-
+  console.log("update org user");
+  var orgId = req.params.orgId;
+  var userId = req.params.userId;
+  var password = req.param("password", "");
+  if (password != "") password = encrypService.generateHashPassword(password);
+  User.findByIdAndUpdate(userId, {
+    username: req.param("username", ""),
+    password: password,
+    firstname: req.param("firstname", ""),
+    lastname: req.param("lastname", ""),
+    email: req.param("email", ""),
+    type: req.param("type", ""),
+  }, function(err, user) {
+    if (err) {
+      console.log("failed to update user", err);
+      res.send({success: false});
+    } else {
+      console.log("user updated");
+      res.send({success: true});
+    }
+  });
 };
 
 exports.deleteOrganizationUser = function(req, res) {
   console.log("delete org user");
   var orgId = req.params.orgId;
   var userId = req.params.userId;
-  User.remove({organizationId: orgId, _id: userId}, function(err) {
+  User.findByIdAndRemove(userId, function(err) {
     if (err) {
       console.log("failed to remove organization user");
     } else {

@@ -10,7 +10,7 @@ block scripts
       var userId = "#{user._id}";
   else
     script(type="text/javascript")
-      var orgId;
+      var orgId = "#{orgId}";
       var userId;
   script(type="text/javascript", src="/js/user/edit.js")
 
@@ -37,10 +37,7 @@ block content
           div(class="form-group")
             label(for="inputPassword", class="col-sm-4 control-label") Password
             div(class="col-sm-6")
-              if user
-                input(type="password", class="form-control", id="inputPassword", name="password", placeholder="Password", value="#{user.password}")
-              else
-                input(type="password", class="form-control", id="inputPassword", name="password", placeholder="Password")
+              input(type="password", class="form-control", id="inputPassword", name="password", placeholder="Password")
           div(class="form-group")
             label(for="inputFirstname", class="col-sm-4 control-label") First Name
             div(class="col-sm-6")
@@ -65,10 +62,13 @@ block content
           div(class="form-group")
             label(for="inputType", class="col-sm-4 control-label") Type
             div(class="col-sm-6")
-              if user
-                input(type="text", class="form-control", id="inputType", name="type", placeholder="Type", value="#{user.type}")
-              else
-                input(type="text", class="form-control", id="inputType", name="type", placeholder="Type")
+              select(name="type", class="form-control")
+                if user && user.type == "orguser"
+                  option(value="orguser", selected="selected") Org User
+                  option(value="orgadmin") Org Admin
+                else
+                  option(value="orguser") Org User
+                  option(value="orgadmin", selected="selected") Org Admin
           div(class="form-group")
             div(class="col-sm-offset-4 col-sm-6")
               <button type="button" class="btn btn-default" id="submitBtn">Submit</button>
