@@ -41,7 +41,7 @@ module.exports = function(app) {
   //app.get("/changeSet/deployment/:deploymentId",changeSetManager.viewDeployment);
   app.delete("/changeSet/deployment/:deploymentId",changeSetManager.deleteDeployment);
 
-  app.get("/test",test.testDeploy);
+  app.get("/test",test.testSFAccessToken);
 
   // admin login
   app.get("/admin", adminAuthFilter.redirectToHomePageIfAlreadyLoggedIn, admin.showloginForm);

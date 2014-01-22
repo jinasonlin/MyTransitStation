@@ -39,7 +39,7 @@ exports.connect2SFDC = function(sfconn,callback){
 		if(client.userId){
 			callback(null,client);
 		}else{
-			callback('err',null);
+			callback(err,null);
 		}
 	});
 };

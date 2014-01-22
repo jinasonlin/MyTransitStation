@@ -18,7 +18,7 @@ mongoose.connect(uristring, function (err, res) {
   }
 });
 
-//app.use(logfmt.requestLogger());
+app.use(logfmt.requestLogger());
 app.set("view engine", "jade");
 app.set("view options", {layout: true});
 app.set("views", __dirname + "/views");

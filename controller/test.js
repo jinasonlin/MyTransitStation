@@ -1,5 +1,7 @@
 var changeSetService = require('../service/changesetservice'),
-	s3service = require('../service/s3service');
+	s3service = require('../service/s3service'),
+	commonservice = require('../service/commonservice')
+	nodeforce = require('../lib/nodeforce');
 
 
 exports.testArchive = function(req,res){
@@ -27,3 +29,27 @@ exports.test = function(req,res){
 		console.log(22);
 	}
 }
+
+exports.testSFAccessToken = function(req,res){
+	var sfconn={
+		username : 'shawn.lnd@123.com',
+		password : '127388626xaxsp',
+		secureToken : '3blQBddY6RkcxRGaulunmPhW3',
+		conn_env : 'login.salesforce.com'
+	};
+	var client = nodeforce.createClient({
+		sid : '00D90000000otEQ!ARAAQKA0R6vF4GiCd33IkgcQgsJyQMCx_c_i_3TKR9a_nwL0GGV1HaGtS53YJI1dFH6bH.Z0sXuZT4M1C_LevAG0nMYzlIQ9',
+		userId : '00590000001DjeCAAS',
+		endpoint : 'https://ap1.salesforce.com/services/Soap/u/29.0/00D90000000otEQ'
+	});
+	client.login(function(err,response,request){
+		if(err)console.log(err);
+		else{
+			console.log(response);
+		}
+	});
+	/*commonservice.connect2SFDC(sfconn,function(err,client){
+		if(err)console.log(err);
+		else console.log(client);
+	});*/
+};

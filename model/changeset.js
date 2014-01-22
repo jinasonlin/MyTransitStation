@@ -1,9 +1,6 @@
 var mongoose = require('mongoose')
   , Schema = mongoose.Schema
-  , ObjectId = Schema.ObjectId
-  , Archive = require('./archive')
-  , Validation = require('./validation')
-  , Deployment = require('./deployment');
+  , ObjectId = Schema.ObjectId;
  
 var ChangeSet = new Schema({
   name: {type :String,default : ''},
