@@ -4,7 +4,7 @@ block stylesheet
   link(rel="stylesheet", href="/styles/admin.css", type="text/css")
 
 block scripts
-  script(type="text/javascript",src="/js/organization/list.js")
+  script(type="text/javascript", src="/js/organization/list.js")
 
 block content
   div(class="container")
@@ -34,6 +34,6 @@ block content
               td #{org.createdDate}
               td #{org.createdBy}
               td
-                <button type="button" class="btn btn-default btn-xs">View</button>
-                <button type="button" class="btn btn-default btn-xs">Edit</button>
+                <button type="button" class="btn btn-default btn-xs js-viewBtn">View</button>
+                <button type="button" class="btn btn-default btn-xs js-editBtn">Edit</button>
                 <button type="button" class="btn btn-default btn-xs js-delBtn">Del</button>

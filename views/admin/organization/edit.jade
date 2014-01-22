@@ -4,25 +4,42 @@ block stylesheet
   link(rel="stylesheet", href="/styles/admin.css", type="text/css")
 
 block scripts
-  script(type="text/javascript",src="/js/organization/edit.js")
+  if org
+    script(type="text/javascript")
+      var orgId = "#{org._id}";
+  else
+    script(type="text/javascript")
+      var orgId;
+  script(type="text/javascript", src="/js/organization/edit.js")
 
 block content
   div(class="container")
-    h1 Salesforce Migration Tool Admin Console - New Organization
+    if org
+      h1 Salesforce Migration Tool Admin Console - Edit Organization
+    else
+      h1 Salesforce Migration Tool Admin Console - New Organization
     div(class="row")
       div(class="col-sm-offset-3 col-sm-6")
-        form(method="post", action="/admin/organization", class="form-horizontal", role="form")
-          input(type="hidden", value="post", name="_method")
+        form(class="form-horizontal", role="form")
+          input(type="hidden", id="inputMethod", name="_method")
+          if org
+            input(type="hidden", name="id", value="#{org._id}")
           div(class="form-group")
             label(for="inputUsername", class="col-sm-4 control-label") Organization Name
             div(class="col-sm-6")
-              input(type="text", class="form-control", id="inputName", name="name", placeholder="Organization Name")
+              if org
+                input(type="text", class="form-control", id="inputName", name="name", placeholder="Organization Name", value="#{org.name}")
+              else
+                input(type="text", class="form-control", id="inputName", name="name", placeholder="Organization Name")
           div(class="form-group")
-            label(for="inputPassword", class="col-sm-4 control-label") Description
+            label(for="inputDescription", class="col-sm-4 control-label") Description
             div(class="col-sm-6")
-              input(type="text", class="form-control", id="inputDescription", name="description", placeholder="Description")
+              if org
+                input(type="text", class="form-control", id="inputDescription", name="description", placeholder="Description", value="#{org.description}")
+              else
+                input(type="text", class="form-control", id="inputDescription", name="description", placeholder="Description")
           div(class="form-group")
             div(class="col-sm-offset-4 col-sm-6")
-              input(type="submit", class="btn btn-default") Save
+              <button type="button" class="btn btn-default" id="submitBtn">Submit</button>
               &nbsp;&nbsp;
               <button type="button" class="btn btn-default" id="cancelBtn">Cancel</button>

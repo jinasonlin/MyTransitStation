@@ -1,0 +1,33 @@
+extends ../../layouts/layout-default
+
+block stylesheet
+  link(rel="stylesheet", href="/styles/admin.css", type="text/css")
+
+block scripts
+  script(type="text/javascript")
+    var orgId = "#{user.organizationId}";
+    var userId = "#{user._id}"
+  script(type="text/javascript", src="/js/user/view.js")
+
+block content
+  div(class="container")
+    h1 Salesforce Migration Tool Admin Console - View Organization User
+    div(class="row")
+      div(class="col-sm-6")
+        <button type="button" class="btn btn-default btn-xs" id="editBtn">Edit</button>
+        <button type="button" class="btn btn-default btn-xs" id="backBtn">Back</button>
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Username</strong>
+      div(class="col-sm-3") #{user.username}
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>First Name</strong>
+      div(class="col-sm-3") #{user.firstname}
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Last Name</strong>
+      div(class="col-sm-3") #{user.lastname}
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Email</strong>
+      div(class="col-sm-3") #{user.email}
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Type</strong>
+      div(class="col-sm-3") #{user.type}

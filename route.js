@@ -51,11 +51,16 @@ module.exports = function(app) {
   app.all(/^\/admin\/organization(\w)*/, adminAuthFilter.checkLogin);
   app.get("/admin/organization", adminAuthFilter.checkLoginOfSuperAdmin, admin.listOrganization);
   app.get("/admin/organization/new", adminAuthFilter.checkLoginOfSuperAdmin, admin.editOrganization);
-  app.get("/admin/organization/:id", adminAuthFilter.checkLoginOfSuperAdmin, admin.viewOrganization);
+  app.get("/admin/organization/:id", adminAuthFilter.checkLoginOfOrgAdmin, admin.viewOrganization);
   app.get("/admin/organization/:id/edit", adminAuthFilter.checkLoginOfSuperAdmin, admin.editOrganization);
   app.post("/admin/organization", adminAuthFilter.checkLoginOfSuperAdmin, admin.createOrganization);
   app.put("/admin/organization/:id", adminAuthFilter.checkLoginOfSuperAdmin, admin.updateOrganization);
   app.delete("/admin/organization/:id", adminAuthFilter.checkLoginOfSuperAdmin, admin.deleteOrganization);
 
-  app.get("/admin/organization/user", function(req, res) {res.send(200)});
+  app.get("/admin/organization/:orgId/user/new", adminAuthFilter.checkLoginOfOrgAdmin, admin.editOrganizationUser);
+  app.get("/admin/organization/:orgId/user/:userId", adminAuthFilter.checkLoginOfOrgAdmin, admin.viewOrganizationUser);
+  app.get("/admin/organization/:orgId/user/:userId/edit", adminAuthFilter.checkLoginOfOrgAdmin, admin.editOrganizationUser);
+  app.post("/admin/organization/:orgId/user", adminAuthFilter.checkLoginOfOrgAdmin, admin.createOrganizationUser);
+  app.put("/admin/organization/:orgId/user/:userId", adminAuthFilter.checkLoginOfOrgAdmin, admin.updateOrganizationUser);
+  app.delete("/admin/organization/:orgId/user/:userId", adminAuthFilter.checkLoginOfOrgAdmin, admin.deleteOrganizationUser);
 }

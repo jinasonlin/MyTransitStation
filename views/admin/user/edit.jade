@@ -1,0 +1,76 @@
+extends ../../layouts/layout-default
+
+block stylesheet
+  link(rel="stylesheet", href="/styles/admin.css", type="text/css")
+
+block scripts
+  if user
+    script(type="text/javascript")
+      var orgId = "#{user.organizationId}";
+      var userId = "#{user._id}";
+  else
+    script(type="text/javascript")
+      var orgId = "#{orgId}";
+      var userId;
+  script(type="text/javascript", src="/js/user/edit.js")
+
+block content
+  div(class="container")
+    if user
+      h1 Salesforce Migration Tool Admin Console - Edit Organization User1
+    else
+      h1 Salesforce Migration Tool Admin Console - New Organization User1
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-6")
+        form(class="form-horizontal", role="form")
+          input(type="hidden", id="inputMethod", name="_method")
+          if user
+            input(type="hidden", name="orgId", value="#{user.organizationId}")
+            input(type="hidden", name="userId", value="#{user._id}")
+          div(class="form-group")
+            label(for="inputUsername", class="col-sm-4 control-label") Username
+            div(class="col-sm-6")
+              if user
+                input(type="text", class="form-control", id="inputUsername", name="username", placeholder="Username", value="#{user.username}")
+              else
+                input(type="text", class="form-control", id="inputUsername", name="username", placeholder="Username")
+          div(class="form-group")
+            label(for="inputPassword", class="col-sm-4 control-label") Password
+            div(class="col-sm-6")
+              input(type="password", class="form-control", id="inputPassword", name="password", placeholder="Password")
+          div(class="form-group")
+            label(for="inputFirstname", class="col-sm-4 control-label") First Name
+            div(class="col-sm-6")
+              if user
+                input(type="text", class="form-control", id="inputFirstname", name="firstname", placeholder="First Name", value="#{user.firstname}")
+              else
+                input(type="text", class="form-control", id="inputFirstname", name="firstname", placeholder="First Name")
+          div(class="form-group")
+            label(for="inputLastname", class="col-sm-4 control-label") Last Name
+            div(class="col-sm-6")
+              if user
+                input(type="text", class="form-control", id="inputLastname", name="lastname", placeholder="Last Name", value="#{user.lastname}")
+              else
+                input(type="text", class="form-control", id="inputLastname", name="lastname", placeholder="Last Name")
+          div(class="form-group")
+            label(for="inputEmail", class="col-sm-4 control-label") Email
+            div(class="col-sm-6")
+              if user
+                input(type="text", class="form-control", id="inputEmail", name="email", placeholder="Email", value="#{user.email}")
+              else
+                input(type="text", class="form-control", id="inputEmail", name="email", placeholder="Email")
+          div(class="form-group")
+            label(for="inputType", class="col-sm-4 control-label") Type
+            div(class="col-sm-6")
+              select(name="type", class="form-control")
+                if user && user.type == "orguser"
+                  option(value="orguser", selected="selected") Org User
+                  option(value="orgadmin") Org Admin
+                else
+                  option(value="orguser") Org User
+                  option(value="orgadmin", selected="selected") Org Admin
+          div(class="form-group")
+            div(class="col-sm-offset-4 col-sm-6")
+              <button type="button" class="btn btn-default" id="submitBtn">Submit</button>
+              &nbsp;&nbsp;
+              <button type="button" class="btn btn-default" id="cancelBtn">Cancel</button>

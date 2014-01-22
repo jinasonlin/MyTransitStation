@@ -7,11 +7,11 @@ var mongoose = require('mongoose')
 var userSchema = new Schema({
   username: {type: String, required: true, unique: true},
   password: String,
-  email: String,
-  type: {type: String, required: true},
-  firstname: String,
-  lastname: String,
-  orgnizationId: ObjectId,
+  email: {type: String, default: ""},
+  type: {type: String, required: true, default: ""},
+  firstname: {type: String, default: ""},
+  lastname: {type: String, default: ""},
+  organizationId: ObjectId,
   createdDate: {type: Date, default: Date.now},
   createdBy: ObjectId
 });

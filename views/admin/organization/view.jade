@@ -1,0 +1,56 @@
+extends ../../layouts/layout-default
+
+block stylesheet
+  link(rel="stylesheet", href="/styles/admin.css", type="text/css")
+
+block scripts
+  script(type="text/javascript") var orgId = "#{org._id}";
+  script(type="text/javascript", src="/js/organization/view.js")
+  script(type="text/javascript", src="/js/user/list.js")
+
+block content
+  div(class="container")
+    h1 Salesforce Migration Tool Admin Console - View Organization1
+    div(class="row")
+      div(class="col-sm-6")
+        <button type="button" class="btn btn-default btn-xs" id="editBtn">Edit</button>
+        <button type="button" class="btn btn-default btn-xs" id="backBtn">Back</button>
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Organization Name</strong>
+      div(class="col-sm-3") #{org.name}
+    div(class="row")
+      div(class="col-sm-offset-3 col-sm-3") <strong>Description</strong>
+      div(class="col-sm-3") #{org.description}
+
+    div(class="row")
+      div(class="col-sm-6")
+        <button type="button" class="btn btn-default btn-xs" id="newUserBtn">New</button>
+    div(class="row")
+      div(class="col-sm-12")
+        table(class="table table-striped table-hover")
+          thead
+            tr
+              th #
+              th Username
+              th First Name
+              th Last Name
+              th Email
+              th Type
+              th Created Date
+              th Created By
+              th Action
+          tbody
+          for user in users
+            tr(class="js-user", data-org-id="#{org._id}", data-user-id="#{user._id}")
+              td 1
+              td #{user.username}
+              td #{user.firstname}
+              td #{user.lastname}
+              td #{user.email}
+              td #{user.type}
+              td #{user.createdDate}
+              td #{user.createdBy}
+              td
+                <button type="button" class="btn btn-default btn-xs js-viewUserBtn">View</button>
+                <button type="button" class="btn btn-default btn-xs js-editUserBtn">Edit</button>
+                <button type="button" class="btn btn-default btn-xs js-delUserBtn">Del</button>
