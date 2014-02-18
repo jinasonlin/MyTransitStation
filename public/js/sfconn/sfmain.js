@@ -75,7 +75,7 @@ $(document).ready(function(){
 	$("#single-select a:first").bind("click",function(){
 		var loginUrl = 'https://login.salesforce.com/';
 		var clientId = '3MVG9Y6d_Btp4xp7ZOesaztHpuKJTdGVM86i1KD.CafBzBowRXP0mAs_oSTxvQrJRXJMVh3pT1oDaLMe7D_Nh';
-		var	redirectUri = 'http://localhost:5000/authcallback';
+		var	redirectUri = 'https://migrationtool-staging.herokuapp.com/authcallback';
 		$("#popupWindow").popupWindow({
 	        windowURL: getAuthorizeUrl(loginUrl, clientId, redirectUri),
 	        windowName: 'Connect',
