@@ -91,7 +91,7 @@ $(document).ready(function(){
 			var data = {
 				name : "validation1",
 				archiveId : archiveId,
-				targetSFConnId : "5301870063507114183da358" 
+				targetSFConnId : "5302d67b0b99d702008fe7c8" 
 			};
 			$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
 				if("done" == data){
@@ -105,7 +105,7 @@ $(document).ready(function(){
 			var data = {
 				name : "deploy1",
 				archiveId : archiveId,
-				targetSFConnId : "5301870063507114183da358" 
+				targetSFConnId : "5302d67b0b99d702008fe7c8" 
 			};
 			$.post("/changeSets/" + csId+ "/deployment", data).done(function (data) {
 				console.log(data);
