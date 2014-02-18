@@ -35,7 +35,7 @@ exports.addAccount = function (data, options) {
 	//TODO
 	//还缺少changeSet部分的登入
 	var saveData = function (data) {
-		Account.find({name: data.name},
+		Account.find({organizationId: data.organizationId},
 			"-fileInfo",	{sort : {name : "asc"}},
 			function(err,accounts){
 				if(err){
@@ -63,8 +63,10 @@ exports.addAccount = function (data, options) {
 	//get User Info and update data
 	getUserInfo(data, {
 		success : function(err, res) {
+			console.log(res);
 			data.name = res.result.userName;
 			data.userEmail = res.result.userEmail;
+			data.organizationId = res.result.organizationId;
 			saveData(data);
 		}
 	});
@@ -150,7 +152,6 @@ function getUserInfo(loginInfo, options) {
 		    endpoint: loginInfo.endpoint
 	});
 	client.login(function(err, response, lastRequest) {
-		console.log(client.userId);
 	    if (!err) {
 			client.getUserInfo(options.success);
 	    } else {

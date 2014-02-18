@@ -37,8 +37,8 @@ exports.listAccount = function (req, res) {
 				SFConnections:SFConnections,
 				title : "SFConnection",
 				errMessage : errMessage||"",
-				single_select_choose1 : "sandbox",
-				single_select_choose2 : "production"
+				single_select_choose1 : "production",
+				single_select_choose2 : "sandbox"
 			});
 		},
 		error : function(err){
@@ -47,15 +47,15 @@ exports.listAccount = function (req, res) {
 				title : "SFConnection",
 				SFConnections:[],
 				errMessage : errMessage||"",
-				single_select_choose1 : "sandbox",
-				single_select_choose2 : "production"
+				single_select_choose1 : "production",
+				single_select_choose2 : "sandbox"
 			});
 		}
 	});
 };
 
 exports.addAccount = function (req, res) {
-	console.log(req.session.user._id);
+	console.log("session user _id = " + req.session.user._id);
 	var newAccount = {
 		name : req.body.connName,
 		sid : req.body.sid,
@@ -75,7 +75,6 @@ exports.addAccount = function (req, res) {
 
 	AccountServer.addAccount(newAccount, {
 		success : function(){
-			//res.redirect("/sfconn");
 			res.send("done");
 		},
 		error : function(){
@@ -114,7 +113,6 @@ exports.updateAccount = function (req, res) {
 	AccountServer.updateAcount(data, {
 		success : function(){
 			res.send("done");
-			//res.redirect("/sfconn");
 			//syncSFConnFile(id);
 		},
 		error : function(){

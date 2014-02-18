@@ -527,8 +527,8 @@ var archiveZip = function(sfconnId,archiveId,userId,callback){
 									opts.unpackaged.types = unpackagedTypes;
 									console.log("begin retrieve data");
 									retrieveData(client, opts, zipFileName, function(err,data){
-										if(err) callback(1);
-										else if(data){
+										if(err) callback(err);
+										else {
 											callback(0);
 										}
 									});
@@ -545,6 +545,10 @@ var archiveZip = function(sfconnId,archiveId,userId,callback){
 var retrieveData = function(client,opts,fileName,callback){
 	var path = __dirname + "/../temp";
 	client.retrieve(opts, function(err,response,request){
+		if(err){
+			callback(-1);
+			return;
+		}
 		var result=response.result;
 		var intervalId=setInterval(function(){
 			client.checkStatus({Id:result.id},function(err,resp,reqs){
@@ -564,10 +568,10 @@ var retrieveData = function(client,opts,fileName,callback){
 										fs.writeFile(path + "/" + fileName, resp1.result.zipFile, {encoding:"base64"}, function(err){
 											if(err){
 												console.log("write error");
-												callback(err);
+												callback("write error");
 											} else {
 												console.log(path + fileName + " save done.");
-												callback(null,"Fileprepared");
+												callback(0);
 											}
 										});
 									}
