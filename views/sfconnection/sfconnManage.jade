@@ -4,9 +4,12 @@ block stylesheet
   link(rel='stylesheet', href='/styles/customer.css', type='text/css' )
 block scripts
   script(type='text/javascript',src="/js/sfconn/sfmain.js")
+  script(type='text/javascript',src="/js/libs/forcetk.js")
+  script(type='text/javascript',src="/js/libs/jquery.popup.js")  
 
 block content
   .container
+    #popupWindow(style="display:none;")
     .page-header
       h2 
         span Salesforce Connections
@@ -14,10 +17,14 @@ block content
           span.glyphicon.glyphicon-plus-sign
           span(style="margin-left:6px;")
             |New connection
+        button.btn.btn-info.btn-xs(data-toggle="modal",data-target="#single-select",style="margin-left:10px;")
+          span.glyphicon.glyphicon-plus-sign
+          span(style="margin-left:6px;")
+            |New connection
     if SFConnections && SFConnections.length>0
       table.table.table-hover.table-condensed
         thead
-          th Connection Name
+          th UserName
           th Org Email
           th Org Type
           th Action
@@ -30,7 +37,7 @@ block content
             tr(ref="#{oriSFConn._id}")
               td 
                 a(href="/sfconn/#{oriSFConn._id}") #{oriSFConn.name}
-              td #{oriSFConn.username}
+              td #{oriSFConn.userEmail}
               td 
                 if oriSFConn.conn_env == 'test.salesforce.com'
                   |sandbox
@@ -93,3 +100,4 @@ block content
                       button.connValidate.btn.btn-warning(type="button",style="margin-right: 10px;") Validate
                       button.btn.btn-primary(type="submit",style="margin-right: 10px;") Save
   include newSFConn
+  include single-select

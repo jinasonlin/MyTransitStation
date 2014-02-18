@@ -22,13 +22,17 @@ exports.listSFConn = function(req,res){
 				err:err,
 				title : 'SFConnection',
 				SFConnections:[],
-				errMessage : errMessage||''
+				errMessage : errMessage||'',
+				single_select_choose1 : 'sandbox',
+				single_select_choose2 : 'production'
 			});
 		}else {
 			res.render('sfconnection/sfconnManage',{
 				SFConnections:SFConnections,
 				title : 'SFConnection',
-				errMessage : errMessage||''
+				errMessage : errMessage||'',
+				single_select_choose1 : 'sandbox',
+				single_select_choose2 : 'production'
 			});
 		}
 	})
@@ -365,7 +369,9 @@ exports.changeSetInfo = function(req,res){
 						archives : results[0],
 						validates : results[1],
 						deploys : results[2] ,
-						sfconns : results[3]
+						sfconns : results[3],
+						single_select_choose1 : 'Choose One',
+						single_select_choose2 : 'New One'
 					});
 				});
 			}else{
@@ -453,4 +459,8 @@ function syncSFConnFile(sfconnId){
 	  		});
 		}
 	});
+}
+
+exports.authcallback = function(req,res){
+	res.render('sfconnection/authcallback');
 }

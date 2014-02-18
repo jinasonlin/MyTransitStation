@@ -1,81 +1,196 @@
-var Archive = require("../model/archive"),
-	ChangeSet = require("../model/changeset"),
-	Validation = require("../model/validation"),
-	Deployment = require("../model/deployment");
-	Moment = require("moment"),
-	changeSetService = require('../service/changesetservice'),
-	commonservice = require('../service/commonservice');
+"use strict";
+var ChangeSetService = require("../service/changesetservice"),
+	Moment = require("moment");
 
-	Moment.lang('en_gb');
+	Moment.lang("en_gb");
 
-exports.addArchive = function(req,res){
-	var csId = req.params.changeSetId;
-	var name = req.query.name;
-	ChangeSet.findById(csId,function(err,changeSet){
-		if(err || changeSet == null) res.send("Cant't find the ChangeSet with id : "+csId);
-		else{
-			var newArchive = {};
-			newArchive.name = name;
-			newArchive.changeSetId = csId;
-			newArchive.createdBy = req.session.user._id;
-			new Archive(newArchive).save(function(err,docs){
-				if(err) res.send("Save Error.Cant't handle this archive save request.");
-				else{
-					if(docs && docs._id){
-						changeSetService.updateArchiveStatus(csId,'block',function(err){
-							if(err)res.send(err);
-							else res.send('done');
-						});
-					}else{
-						res.send('done');
-					}
-				}
+exports.changeSetInit = function(req,res){
+	var data = {
+		id : req.params.sfconnId,
+		csId : req.query.csId
+	};
+	var callback = {
+		showChangeSet : function (account, changeSet) {
+			res.render("sfconnection/newChangeSet", {
+				title : "ChangeSet | " + changeSet.name,
+				_sfconn : account,
+				changeSet : changeSet
+			});
+		},
+		newChangeSet : function (account) {
+			res.render("sfconnection/newChangeSet", {
+				title : "ChangeSet | New ChangeSet",
+				_sfconn : account
+			});
+		},
+		syncing : function (account) {
+			//syncSFConnFile(account._id);
+			res.render("sfconnection/newChangeSet", {
+				title : "ChangeSet | New ChangeSet",
+				_sfconn : account,
+				message : "File sync is InProgress, please refresh this page few seconds later :)."
+			});
+		},
+		error : function () {
+
+		}
+	};
+	ChangeSetService.changeSetInit(data, callback);
+};
+
+exports.changeSetSave = function(req,res){
+	var data = {
+		selectFiles : req.body.selectFiles,
+		csId : req.query.csId,
+		cs : {
+			name : req.body.csName,
+			files : [],
+			sfconnId : req.params.sfconnId,
+			createdBy : req.session.user._id
+		}
+	};
+
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.changeSetSave(data, callback);
+};
+
+exports.changeSetInfo = function(req,res){
+	var data = {
+		changeSetId : req.params.changeSetId,
+		session : req.session
+	};
+
+	var callback = {
+		success : function (changeSet, results) {
+			res.render("sfconnection/changeSetInfo",{
+				title : "ChangeSet | " + changeSet.name,
+				changeSet :  changeSet,
+				sfconn : global.sfclient,
+				archives : results[0],
+				validates : results[1],
+				deploys : results[2] ,
+				sfconns : results[3],
+				single_select_choose1 : "Choose One",
+				single_select_choose2 : "New One"
+			});
+		},
+		error : function () {
+			res.render("404",{
+				title : "404",
 			});
 		}
-	});
+	};
+
+	ChangeSetService.changeSetInfo(data, callback);
+};
+
+exports.changeSetDelete = function(req,res){
+	var data = {
+		csId : req.params.changeSetId
+	};
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.changeSetDelete(data, callback);
+};
+
+exports.addArchive = function(req,res){
+	var data = {
+		csId : req.params.changeSetId,
+		name : req.query.name,
+		session : req.session
+	};
+
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.addArchive(data, callback);
 };
 
 exports.deleteArchive = function(req,res){
-	var archiveId = req.params.archiveId;
-	if(archiveId){
-		Archive.findByIdAndRemove(archiveId,function(err,doc){
-			if(err) res.send(err);
-			else {
-				changeSetService.checkCSArchiveStatus(doc.changeSetId,function(err){
-					if(err)res.send(err);
-					else res.send('done');
-				});
-			}
-		});
-	}
+	var data = {
+		archiveId : req.params.archiveId
+	};
+
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.deleteArchive(data, callback);
+};
+
+exports.addValidation = function(req,res){
+	var data = {
+		csId : req.params.changeSetId,
+		name : req.body.name,
+		archiveId : req.body.archiveId,
+		targetSFConnId : req.body.targetSFConnId,
+		session : req.session
+	};
+
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.addValidation(data, callback);
 };
 
 exports.deleteValidation = function(req,res){
-	var validationId = req.params.validationId;
-	if(validationId){
-		Validation.findByIdAndRemove(validationId,function(err,doc){
-			if(err) res.send(err);
-			else {
-				changeSetService.checkCSValidateStatus(doc.changeSetId,function(err){
-					if(err)res.send(err);
-					else res.send('done');
-				});
-			}
-		});
-	}
+	var data = {
+		validationId : req.params.validationId
+	};
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.deleteValidation(data, callback);
+};
+
+//TODO
+exports.addDeployment = function(req,res){
+	var data = {
+		csId : req.params.changeSetId,
+		name : req.body.name,
+		archiveId : req.body.archiveId,
+		targetSFConnId : req.body.targetSFConnId,
+		session : req.session
+	};
+
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.addDeployment(data, callback);
 };
 
 exports.deleteDeployment = function(req,res){
-	var deploymentId = req.params.deploymentId;
-	if(deploymentId){
-		Deployment.findByIdAndRemove(deploymentId,function(err,doc){
-			if(err)res.send(err);
-			else {
-				changeSetService.checkCSDeployStatus(doc.changeSetId,function(err){
-					if(err)res.send(err);
-					else res.send('done');
-				});
-			}
-		});
-	}
+	var data = {
+		deploymentId : req.params.deploymentId
+	};
+	var callback = {
+		response : function (message) {
+			res.send(message);
+		}
+	};
+
+	ChangeSetService.deleteDeployment(data, callback);
 };

@@ -1,49 +1,43 @@
-var fs = require('fs'),
+"use strict";
+var fs = require("fs"),
 	nodeforce = require("../lib/nodeforce");
 
 exports.confirmDirExists = function(path,callback){
-	fs.existsSync(path,function(exists){
-		if(exists){
-			callback(null,'exists');
-		}else{
-			fs.mkdirSync(path,function(err){
-				if(err) callback(err);
-				else callback(null,'exists');
-			});
+	if (fs.existsSync(path)) {
+		callback(true, "path is exists");
+	} else {
+		fs.mkdirSync(path, "0755");
+		if (fs.existsSync(path)) {
+			callback(true, "new path succes");
+		} else {
+			callback(false, "new path failure");
 		}
-	});
+	}
 };
 
 exports.checkFileExists = function(path,callback){
-	var rootPath = fs.realpathSync('.');
-	var filePath = rootPath + path;
-	console.log('check '+ filePath +' exists or not');
-	fs.exists(filePath,function(exists){
-		if(exists){
-			console.log(filePath+' exist');
-			callback(null)
-		}else {
-			console.log(filePath+' not exist');
-			callback('Notexist');
-		}
-	});
+	if (fs.existsSync(path)) {
+		callback(true, "path is exists");
+	} else {
+		callback(false, "path is not exists");
+	}
 };
 
-exports.connect2SFDC = function(sfconn,callback){
+exports.connectSFDC = function (data, callback) {
 	var client = nodeforce.createClient({
-		username : sfconn.username,
-		password : sfconn.password + sfconn.secureToken,
-		endpoint : sfconn.conn_env
+		    sid: data.sid,
+		    userId: data.userId,
+		    endpoint: data.endpoint
 	});
-	client.login(function(err,response,request){
-		if(client.userId){
+	client.login(function(err, response, lastRequest) {
+	    if (client.userId) {
 			callback(null,client);
-		}else{
+	    } else {
 			callback(err,null);
-		}
+	    }
 	});
 };
 
 exports.STATICS = {
-	datefmt : 'YYYY-MM-DD HH:mm:ss'
+	datefmt : "YYYY-MM-DD HH:mm:ss"
 };

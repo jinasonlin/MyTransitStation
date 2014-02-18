@@ -83,10 +83,10 @@ block content
                             |#{archive.status}
                         td 
                           if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
-                            button.btn.btn-xs.btn-primary.bakvalidate(style="margin-left: 6px;") Validate
-                            button.btn.btn-xs.btn-primary.bakdeploy(style="margin-left: 6px;") Deploy
+                            button.btn.btn-xs.btn-primary.bakvalidate.archive-validate(style="margin-left: 6px;") Validate
+                            button.btn.btn-xs.btn-primary.bakdeploy.archive-deploy(style="margin-left: 6px;") Deploy
                           else
-                            button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Validate
+                            button.btn.btn-xs.btn-warning.test(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Validate
                             button.btn.btn-xs.btn-warning(style="margin-left: 6px;",title="This is an validation/deployment in processing.") Deploy
                           if archive.status=='inProcess'
                             button.btn.btn-xs.btn-info.bakcancel(style="margin-left: 6px;") Cancel

@@ -1,7 +1,8 @@
 var changeSetService = require('../service/changesetservice'),
 	s3service = require('../service/s3service'),
-	commonservice = require('../service/commonservice')
-	nodeforce = require('../lib/nodeforce');
+	commonservice = require('../service/commonservice'),
+	nodeforce = require('../lib/nodeforce'),
+	Account = require('../model/account');
 
 
 exports.testArchive = function(req,res){
@@ -52,4 +53,19 @@ exports.testSFAccessToken = function(req,res){
 		if(err)console.log(err);
 		else console.log(client);
 	});*/
+};
+
+exports.addSFConn = function (req, res) {
+	console.log(req.body);
+
+	var newSFConn={
+		name : "test",
+		sid : req.body.sid,
+		userId : req.body.userId,
+		endpoint : req.body.endpoint,
+		createdBy : req.session.user._id
+	};
+	new Account(newSFConn).save(function(err,docs){
+		res.send("ok");
+		});
 };
