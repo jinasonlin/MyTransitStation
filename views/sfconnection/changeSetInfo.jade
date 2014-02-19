@@ -16,7 +16,7 @@ block content
       .panel-heading 
         .col-md-10
           h2.pull-left #{title}
-            small (#{sfconn.username})
+            small (#{sfconn.orgName})
       .panel-body
         .row
           .row 
@@ -175,7 +175,6 @@ block content
                             button.btn.btn-xs.btn-warning.deployment-drop(style="margin-left: 6px;") Drop
             else 
               .col-md-7 No Data.
-  include newSFConn
   include single-name
   include single-select
   include sfconn-select

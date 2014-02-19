@@ -5,14 +5,16 @@ var mongoose = require('mongoose'),
   ObjectId = Schema.ObjectId;
 
 var Account = new Schema({
-  name : {type : String, default : ''},
   orgName : {type : String, default : ''},
+  orgType : {type : String, default : ''},
   organizationId : {type : String, default : ''},
   userName : {type : String, default : ''},
   userEmail : {type : String, default : ''},
+  //login info start
   sid : {type : String, default : ''},
   userId : {type : String, default : ''},
   endpoint : {type : String, default : ''},
+  //login info end
   createdDate : {type: Date, default: Date.now},
   createdBy : {type: ObjectId, default : null},
   fileInfo : {type : Array, default : []},

@@ -1,3 +1,6 @@
 if errMessage
-  .row.alert.alert-danger(style="margin-left:10px;") #{errMessage}
-    button.close(type="button",onclick="javascript:$(this).parent().fadeOut(2000);") &times;
+	#errMessage.row.alert.alert-danger(style="margin-left:10px;") #{errMessage}
+		button.close(type="button",onclick="javascript:$(this).parent().fadeOut(2000);") &times;
+else 
+	#errMessage.row.alert.alert-danger(style="margin-left:10px;display:none;") #{errMessage}
+		button.close(type="button",onclick="javascript:$(this).parent().fadeOut(2000);") &times;

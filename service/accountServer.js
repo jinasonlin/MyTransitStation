@@ -21,7 +21,7 @@ exports.validateAccount = function (data, options) {
 
 exports.listAccount = function (data, options) {
 	Account.find({createdBy: data.id, accountType : "normal"},
-		"-fileInfo",	{sort : {name : "asc"}},
+		"-fileInfo",	{sort : {userName : "asc"}},
 		function(err,accounts){
 			if(err){
 				options.error(err);
@@ -34,24 +34,30 @@ exports.listAccount = function (data, options) {
 exports.addAccount = function (data, options) {
 	//TODO
 	//还缺少changeSet部分的登入
+	var lockOrg = typeof data.lockOrg === "boolean" ? data.lockOrg : (data.lockOrg === "true");
 	var saveData = function (data) {
 		Account.find({organizationId: data.organizationId},
-			"-fileInfo",	{sort : {name : "asc"}},
+			"-fileInfo",	{sort : {userName : "asc"}},
 			function(err,accounts){
 				if(err){
-					options.error();
+					options.error({errMessage : "Account Error"});
 				} else if(accounts && accounts.length === 0) { 
-					new Account(data).save(function(err, account){
-						if(err){
-							options.error();
-						}else {
-							options.success();
-						}
-					});
+					if(!lockOrg){
+						new Account(data).save(function(err, account){
+							if(err){
+								options.error({errMessage : "Save Account Error"});
+							}else {
+								options.success();
+							}
+						});
+					} else {
+						options.error({errMessage : "The Account isn't in this organization"});
+					}
 				} else {
+					checkObject(data);
 					accounts[0].update(data, function(err, account){
 						if(err){
-							options.error();
+							options.error({errMessage : "Update Account Error"});
 						}else {
 							options.success();
 						}
@@ -64,7 +70,7 @@ exports.addAccount = function (data, options) {
 	getUserInfo(data, {
 		success : function(err, res) {
 			console.log(res);
-			data.name = res.result.userName;
+			data.userName = res.result.userName;
 			data.userEmail = res.result.userEmail;
 			data.organizationId = res.result.organizationId;
 			saveData(data);
@@ -141,6 +147,14 @@ exports.getAccount = function (data, options) {
 			options.success(account);
 		}
 	});
+};
+
+var checkObject = function (obj) {
+	for (var i in obj) {
+		if (obj[i] === null || obj[i] === undefined) {
+			delete obj[i];
+		}
+	}
 };
 
 

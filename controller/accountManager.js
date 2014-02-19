@@ -9,7 +9,7 @@ exports.authcallback = function(req,res){
 	res.render("sfconnection/authcallback");
 };
 
-exports.validateAccount = function(req, res, next){
+exports.validateAccount = function(req, res){
 	var account = {
 		sid : req.body.sid,
 		userId : req.body.userId,
@@ -57,16 +57,16 @@ exports.listAccount = function (req, res) {
 exports.addAccount = function (req, res) {
 	console.log("session user _id = " + req.session.user._id);
 	var newAccount = {
-		name : req.body.connName,
+		lockOrg : req.body.lockOrg,
 		sid : req.body.sid,
 		userId : req.body.userId,
 		endpoint : req.body.endpoint,
+		orgName : req.body.orgName,
 		createdBy : req.session.user._id
 	};
 	var isStore = req.body.isStore;
 	var csId = req.body.csId;
 	var triggel_name = req.body.triggleName;
-	var name = req.body.name;
 	if(csId && triggel_name){
 		if(!isStore){
 			newAccount.accountType = "temp";
@@ -77,8 +77,8 @@ exports.addAccount = function (req, res) {
 		success : function(){
 			res.send("done");
 		},
-		error : function(){
-			res.send({errMessage : "Save Error"});
+		error : function(err){
+			res.send(err);
 		}
 	});
 };
@@ -100,17 +100,17 @@ exports.deleteAccount = function (req, res) {
 
 exports.updateAccount = function (req, res) {
 	var updataAccount = {
-		name : req.body.connName,
-		sid : req.body.sid,
-		userId : req.body.userId,
-		endpoint : req.body.endpoint
+		//sid : req.body.sid,
+		//userId : req.body.userId,
+		//endpoint : req.body.endpoint,
+		orgName : req.body.orgName
 	};
 	var data = {
 		id : req.params.sfconnId,
 		updataAccount : updataAccount
 	};
 
-	AccountServer.updateAcount(data, {
+	AccountServer.updateAccount(data, {
 		success : function(){
 			res.send("done");
 			//syncSFConnFile(id);
@@ -144,7 +144,7 @@ exports.listAccountInfo = function(req, res){
 	var callbacks = {
 		loginSuccess : function (account, ChangeSets) {
 			res.render("sfconnection/sfconnInfo",{
-				title : "SFConnection | " + account.name,
+				title : "SFConnection | " + account.userName,
 				sfconn : account,
 				changeSets : ChangeSets || [new ChangeSet()],
 				user : req.session.user

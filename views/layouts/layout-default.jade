@@ -21,7 +21,7 @@ html(lang='en')
             li
               a(href="/sfconn") SFDC Connections
             if global.sfconn
-              a(href="/sfconn/"+global.sfconn._id,style="margin-left:30px;") #{global.sfconn.name}
+              a(href="/sfconn/"+global.sfconn._id,style="margin-left:30px;") #{global.sfconn.userName}
               a(href="/sfconn/logout",style="margin-left:4px;").btn.btn-xs.btn-warning Log out
       .col-md-8.col-sm-8 
         include errMessage
