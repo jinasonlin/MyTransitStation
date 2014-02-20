@@ -1,6 +1,7 @@
 script(type='text/javascript',src="/js/sfconn/sfconn-select.js")
 
 #sfconn-select.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel",aria-hidden="true")
+  input#archiveId(type="hidden",value="")
   .modal-dialog(style="width:500px;")
     .modal-content
       .modal-header
@@ -15,7 +16,7 @@ script(type='text/javascript',src="/js/sfconn/sfconn-select.js")
         .row(style="margin-top:10px;")
           .col-sm-3.col-md-3.col-sm-offset-1.col-md-offset-1
             label.control-label.pull-right SFConnection 
-          .col-sm-7.col-md-7.choosedSFConn None Choosed
+          .col-sm-7.col-md-7.choosedSFConn(value="") None Choosed
         .row
           .col-sm-7.col-sm-offset-4.col-md-7.col-md-offset-4 
             if sfconns && sfconns.length>0
@@ -25,14 +26,11 @@ script(type='text/javascript',src="/js/sfconn/sfconn-select.js")
                   li
                     .radio
                       label
-                        input.sfconnRadio(type="radio") 
-                        |#{sfconn.name}
-                        em (#{sfconn.userName} | 
-                          =sfconnENVType
-                          )
+                        input.sfconnRadio(type="radio" value="#{sfconn._id}") 
+                        |#{sfconn.userName} | #{sfconnENVType}
             else
               No Data.
-        .row
-          .col-sm-5.col-md-5.pull-right.col-sm-offset-7.col-md-offset-7
-            a.btn.btn-sm.btn-warning Validate
-            a.btn.btn-sm.btn-info(disabled=true,style="margin-left:6px;") Submit
+      .modal-footer
+        .col-sm-5.col-md-5.pull-right.col-sm-offset-7.col-md-offset-7
+          a.btn.btn-sm.btn-info.new New One 
+          a.btn.btn-sm.btn-info.submit(style="margin-left:6px;") Submit

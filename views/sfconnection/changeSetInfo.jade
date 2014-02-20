@@ -28,13 +28,10 @@ block content
                 else
                   button.btn.btn-xs.btn-info(type="button",style="margin-left:4px;",onclick="window.open('/sfconn/#{sfconn._id}/changeSets?csId=#{changeSet._id}','_self')") Edit
             .col-md-7.pull-right(style="padding-top: 3px;text-align:center;")
-              //if changeSet.archiveStatus=='block'
-              //  button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="The last archive action in processing.") Archive
-              //else
               button.btn.btn-sm.btn-primary.archive(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-name") Archive
               if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
-                button.btn.btn-sm.btn-primary.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-select") Validate
-                button.btn.btn-sm.btn-primary.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-select") Deploy
+                button.btn.btn-sm.btn-primary.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#sfconn-select") Validate
+                button.btn.btn-sm.btn-primary.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#sfconn-select") Deploy
               else
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Validate
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Deploy
@@ -173,5 +170,4 @@ block content
             else 
               .col-md-7 No Data.
   include single-name
-  include single-select
   include sfconn-select

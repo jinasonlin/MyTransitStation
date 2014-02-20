@@ -77,42 +77,41 @@ $(document).ready(function(){
 		});
 	});
 
-	$("#single-select a:first").bind('click',function(){
-		$("#sfconn-select").modal('show');		
-	});
-	$("#single-select a:last").bind('click',function(){
-		$("#newSFConnPanel").modal('show');		
-	});
-
 	/******************************* test ***************************/
 		$(".archive-validate").bind("click",function(){
 			var csId = $("#csId").val();
 			var archiveId = $(this).parent().parent().attr("id");
-			var data = {
+			$("#archiveId").val(archiveId);
+			/*var data = {
 				name : "validation1",
 				archiveId : archiveId,
 				targetSFConnId : "5302d67b0b99d702008fe7c8" 
 			};
-			$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
+			console.log(archiveId);*/
+			/*$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
 				if("done" == data){
 					location.reload(true);
 				}	
-			});
+			});*/
+			$("#sfconn-select").modal("show");
 		});
 		$(".archive-deploy").bind("click",function(){
 			var csId = $("#csId").val();
 			var archiveId = $(this).parent().parent().attr("id");
-			var data = {
+			$("#archiveId").val(archiveId);
+			/*var data = {
 				name : "deploy1",
 				archiveId : archiveId,
 				targetSFConnId : "5302d67b0b99d702008fe7c8" 
 			};
-			$.post("/changeSets/" + csId+ "/deployment", data).done(function (data) {
+			console.log(archiveId);*/
+			/*$.post("/changeSets/" + csId+ "/deployment", data).done(function (data) {
 				console.log(data);
 				if("done" == data){
 					location.reload(true);
 				}	
-			});
+			});*/
+			$("#sfconn-select").modal("show");
 		});
 });
 
