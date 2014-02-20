@@ -34,25 +34,25 @@ exports.listAccount = function (data, options) {
 exports.addAccount = function (data, options) {
 	//TODO
 	//还缺少changeSet部分的登入
-	var lockOrg = typeof data.lockOrg === "boolean" ? data.lockOrg : (data.lockOrg === "true");
 	var saveData = function (data) {
+		if(data.orgId && data.orgId !== data.organizationId) {
+			console.log("orgId = " + data.orgId);
+			options.error({errMessage : "The Account isn't in this organization"});
+			return;
+		}
 		Account.find({organizationId: data.organizationId},
 			"-fileInfo",	{sort : {userName : "asc"}},
 			function(err,accounts){
 				if(err){
 					options.error({errMessage : "Account Error"});
 				} else if(accounts && accounts.length === 0) { 
-					if(!lockOrg){
-						new Account(data).save(function(err, account){
-							if(err){
-								options.error({errMessage : "Save Account Error"});
-							}else {
-								options.success();
-							}
-						});
-					} else {
-						options.error({errMessage : "The Account isn't in this organization"});
-					}
+					new Account(data).save(function(err, account){
+						if(err){
+							options.error({errMessage : "Save Account Error"});
+						}else {
+							options.success();
+						}
+					});
 				} else {
 					checkObject(data);
 					accounts[0].update(data, function(err, account){
@@ -139,8 +139,8 @@ exports.listAccountInfo = function(data, options){
 };
 
 /* ----------------------- utility -------------------------- */
-exports.getAccount = function (data, options) {
-	Account.findById(data.id, function(err, account){
+exports.getAccount = function (id, options) {
+	Account.findById(id, function(err, account){
 		if(err){
 			options.error(err);
 		} else {

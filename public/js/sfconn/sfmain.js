@@ -24,9 +24,11 @@ $(document).ready(function(){
 		 * re auth
 		**/
 		$("tr[ref='"+sfconnId+"']").find(".sfconn-oauth").bind("click",function(){
-			oauthProduction(true);
+			var orgId = $(this).parent().parent().find(".organizationId").attr("id");
 
-			//oauthSandBox(true);
+			oauthProduction(orgId);
+
+			//oauthSandBox(orgId);
 		});
 
 		$("tr[ref='"+sfconnId+"']").find(".sfconn-cs").bind("click",function(){

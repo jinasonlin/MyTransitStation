@@ -57,11 +57,11 @@ exports.listAccount = function (req, res) {
 exports.addAccount = function (req, res) {
 	console.log("session user _id = " + req.session.user._id);
 	var newAccount = {
-		lockOrg : req.body.lockOrg,
+		orgId : req.body.orgId,
+		orgName : req.body.orgName,
 		sid : req.body.sid,
 		userId : req.body.userId,
 		endpoint : req.body.endpoint,
-		orgName : req.body.orgName,
 		createdBy : req.session.user._id
 	};
 	var isStore = req.body.isStore;

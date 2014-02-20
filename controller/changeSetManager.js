@@ -69,6 +69,7 @@ exports.changeSetInfo = function(req,res){
 		success : function (changeSet, results) {
 			res.render("sfconnection/changeSetInfo",{
 				title : "ChangeSet | " + changeSet.name,
+				session : req.session,
 				changeSet :  changeSet,
 				sfconn : global.sfclient,
 				archives : results[0],

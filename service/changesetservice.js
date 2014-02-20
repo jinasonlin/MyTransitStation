@@ -5,12 +5,13 @@ var nodeforce = require("../lib/nodeforce"),
 	Archive = require("../model/archive"),
 	Validation = require("../model/validation"),
 	Deployment = require("../model/deployment"),
-	s3service = require("../service/s3service"),
 	CommonService = require("./commonservice"),
+	AccountServer = require("../service/accountServer"),
+	S3service = require("../service/s3service"),
 	async = require("async"),
 	fs = require("fs");
 
-var AccountServer = require("../service/accountServer");
+var tag = "changeSet Service : ";
 
 exports.changeSetInit = function (data, options) {
 	var callback = {
@@ -65,7 +66,7 @@ exports.changeSetInit = function (data, options) {
 		}
 	};
 
-	AccountServer.getAccount(data, callback);
+	AccountServer.getAccount(data.id, callback);
 };
 
 exports.changeSetSave = function (data, options) {
@@ -145,7 +146,6 @@ exports.changeSetInfo = function(data, options){
 	ChangeSet.findById(data.changeSetId, function(err, changeSet){
 		if (err) {
 			options.error();
-			//res.redirect("/sfconn/"+req.params.sfconnId);
 		} else {
 			if(changeSet){
 				async.parallel([
@@ -162,17 +162,19 @@ exports.changeSetInfo = function(data, options){
 							callback(null,deployments||[]);
 						});
 					},function(callback){
-						var data = {
-							id : global.sfconn._id
-						};
-						AccountServer.getAccount(data, {
-							success : function (account) {
-								callback(null, account);
+						Account.find({
+							_id : {
+								$ne : global.sfconn._id
 							},
-							error : function (err) {
+							accountType : "normal"
+						},"-fileInfo",{sort:{name:"asc"}},function(err, accounts){
+							if(err) {
 								callback(null, []);
+							} else {
+								callback(null, accounts);
 							}
 						});
+
 				}], function(err, results){
 					options.success(changeSet, results);
 				});
@@ -203,15 +205,17 @@ exports.addArchive = function(data, options){
 				if (err) {
 					options.response("Save Error.Cant't handle this archive save request.");
 				} else {
+					updateCSArchiveStatus(data.csId, function(e){ if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);});
 					if(archive && archive._id){
 						var params = {
-							//status : "block"
+							status : "inProcess"
 						};
 						updateArchive(archive._id, params, function(err){
 							if(err) options.response(err);
 							else options.response("done");
 
-							archiveZip(global.sfconn._id, archive._id, data.session.user._id, function(e){console.log(e);});
+							archiveZip(data.csId, global.sfconn._id, archive._id, data.session.user._id,
+								function(e){console.log(tag + "<-------> archiveZip callback : " +e);});
 						});
 					}else{
 						options.response("done");
@@ -343,7 +347,9 @@ var updateArchive = function(archiveId, data, callback){
 	checkObject(data);
 	Archive.findById(archiveId,function(err,archive){
 		if(archive){
-			archive.update(data, callback);
+			archive.update(data, function(err){
+				if(!err && callback) callback();
+			});
 		}
 	});
 };
@@ -380,7 +386,8 @@ var updateCSArchiveStatus = function(csId, callback){
 						else callback(null);
 					});
 				};
-				for(var i = 0; i < archives.length; i++){
+				inline();
+				/*for(var i = 0; i < archives.length; i++){
 					var archive = archives[i];
 					if(archive.status == "inProcess"){
 						inline();
@@ -389,11 +396,11 @@ var updateCSArchiveStatus = function(csId, callback){
 					}
 				}
 				if(!isBreak){
-					ChangeSet.findByIdAndUpdate(csId,{archiveStatus : "done"},function(err){
+					ChangeSet.findByIdAndUpdate(csId,{archiveStatus : "none"},function(err){
 						if(err)callback(err);
 						else callback(null);
 					});
-				}
+				}*/
 			} else {
 				ChangeSet.findByIdAndUpdate(csId,{archiveStatus : "none"},function(err){
 					if(err) callback(err);
@@ -486,27 +493,42 @@ var checkObject = function (obj) {
 
 
 //callback err: 1(fail,can retry action) 0(done) -1(err,action will never sucess)
-var archiveZip = function(sfconnId,archiveId,userId,callback){
+var archiveZip = function(csId, sfconnId, archiveId, userId, callback){
+	var setAchiveStatus = function (status) {
+		var params = {
+			status : status
+		};
+		updateArchive(archiveId, params, function (){
+			updateCSArchiveStatus(csId, function(e){ if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);});
+		});
+	};
+
 	var zipFileName = userId+"_"+archiveId+".zip";
 	Account.findById(sfconnId,"-fileInfo",function(err,sfconn){
 		if(err || sfconn === null){
-			callback(-1);
+			setAchiveStatus("fail");
+			callback("cannot find the account");
 		} else {
-			console.log("find sfconn "+sfconn.name);
+			console.log(tag + "find sfconn "+sfconn.userName);
 			CommonService.connectSFDC(sfconn,function(err,client){
-				if(err)callback(-1);
+				if(err) {
+					setAchiveStatus("fail");
+					callback("connect the org fail");
+				}
 				if(client){
-					console.log("login sf with "+sfconn.name);
+					console.log(tag + "login sf with "+sfconn.userName);
 					Archive.findById(archiveId,function(err,archive){
 						if(err || archive === null){
-							callback(-1);
+							setAchiveStatus("fail");
+							callback("find archive fail");
 						}else{
-							console.log("find archive "+archive.name);
+							console.log(tag + "find archive " + archive.name + " id" + archive._id);
 							ChangeSet.findById(archive.changeSetId,function(err,changeSet){
 								if(err || changeSet === null || changeSet.files === null){
-									callback(-1);
+									setAchiveStatus("fail");
+									callback("find changeSet fail");
 								}else{
-									console.log("find ChangeSet "+changeSet.name);
+									console.log(tag + "find ChangeSet "+changeSet.name + " id " + changeSet._id);
 									var opts = {
 										apiVersion : 29.0,
 										unpackaged : {}
@@ -525,11 +547,23 @@ var archiveZip = function(sfconnId,archiveId,userId,callback){
 										}
 									}
 									opts.unpackaged.types = unpackagedTypes;
-									console.log("begin retrieve data");
-									retrieveData(client, opts, zipFileName, function(err,data){
-										if(err) callback(err);
-										else {
-											callback(0);
+									console.log(tag + "begin retrieve data");
+									retrieveData(client, opts, zipFileName, function(err){
+										if(err) {
+											setAchiveStatus("fail");
+											callback(err);
+										} else {
+											S3service.uplaodData(zipFileName, function(err, key){
+												if(err) {
+													setAchiveStatus("fail");
+													callback("uplaodData error" + err);
+												} else {
+													callback("uplaodData success");	
+													setAchiveStatus("done");
+												}
+											});
+											//setAchiveStatus("done");
+											//callback(0);
 										}
 									});
 								}
@@ -546,7 +580,7 @@ var retrieveData = function(client,opts,fileName,callback){
 	var path = __dirname + "/../temp";
 	client.retrieve(opts, function(err,response,request){
 		if(err){
-			callback(-1);
+			callback("retrieve fail");
 			return;
 		}
 		var result=response.result;
@@ -557,33 +591,32 @@ var retrieveData = function(client,opts,fileName,callback){
 					clearInterval(intervalId);
 					client.checkRetrieveStatus({Id:result.id},function(err,resp1,req1){
 						if(resp1 && resp1.result && resp1.result.zipFile){
-							console.log("retrieve data done");
+							console.log(tag + "retrieve data done");
 							if(resp1.result.zipFile.length <= 100*1024*1024){
-								console.log("start write zip");
+								console.log(tag + "start write zip");
 								CommonService.confirmDirExists(path, function(exists, message){
-									console.log(message);
+									console.log(tag + message);
 									if(!exists) {
 										callback(message);
 									} else {
 										fs.writeFile(path + "/" + fileName, resp1.result.zipFile, {encoding:"base64"}, function(err){
 											if(err){
-												console.log("write error");
-												callback("write error");
+												console.log(tag + "write error");
+												callback("write file system error");
 											} else {
-												console.log(path + fileName + " save done.");
-												callback(0);
+												console.log(tag + path + "/" + fileName + " save done.");
+												callback();
 											}
 										});
 									}
 								});
 							}else{
-								callback(err);
-								console.log("Too large file size( >100M ).");
+								callback("Too large file size( >100M ).");
 							}
 						}
 					});
 				}else{
-					console.log("checkStatus of download state : "+result1.state);
+					console.log(tag + "checkStatus of download state : "+result1.state);
 				}
 			});
 		},1000);

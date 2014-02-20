@@ -32,7 +32,7 @@ block content
             - var createdDate = moment(oriSFConn.createdDate).format('YYYY-MM-DD HH:mm:ss');
             - var lastFileSyncDate = oriSFConn.lastFileSyncDate != null ? moment(oriSFConn.lastFileSyncDate).format('YYYY-MM-DD HH:mm:ss') : '';
             tr(ref="#{oriSFConn._id}")
-              td #{oriSFConn.orgName}
+              td.organizationId(id="#{oriSFConn.organizationId}") #{oriSFConn.orgName}
               td 
                 a(href="/sfconn/#{oriSFConn._id}") #{oriSFConn.userName}
               td #{oriSFConn.userEmail}

@@ -1,5 +1,5 @@
 "use strict";
-var tempOrgName, lockOrg;
+var tempOrgName, orgId;
 
 $(document).ready(function(){
 	function checkInputName () {
@@ -27,9 +27,9 @@ $(document).ready(function(){
 	});
 });
 
-function oauthProduction(lock) {
-	if(lock) lockOrg = true;
-	else lockOrg = false;
+function oauthProduction(id) {
+	if(id) orgId = id;
+	else orgId = null;
 
 	var loginUrl = "https://login.salesforce.com/";
 	var clientId = "3MVG9Y6d_Btp4xp7ZOesaztHpuKJTdGVM86i1KD.CafBzBowRXP0mAs_oSTxvQrJRXJMVh3pT1oDaLMe7D_Nh";
@@ -48,9 +48,9 @@ function oauthProduction(lock) {
     $("#popupWindow").trigger("click");	
 }
 
-function oauthSandBox(lock) {
-	if(lock) lockOrg = true;
-	else lockOrg = false;
+function oauthSandBox(id) {
+	if(id) orgId = id;
+	else orgId = null;
 
 	var loginUrl = "https://test.salesforce.com/";
 	var clientId = "3MVG9A2kN3Bn17huLzcysKVpjdfzblwRb4UArmn8iNYIAykHugRL76dwTzlY9ryzUqTBdxSGypMLbbkYGmdA.";
@@ -78,8 +78,8 @@ function sessionCallback(oauthResponse) {
 	var splitToken = oauthResponse.access_token.split("!");
 	var splitId = oauthResponse.id.split("/");
 	var sfconn={};
-	sfconn.lockOrg = lockOrg;
-	if(tempOrgName !== "" && !lockOrg){
+	sfconn.orgId = orgId;
+	if(tempOrgName !== "" && !orgId){
 		sfconn.orgName = tempOrgName;
 	}
 	sfconn.sid = oauthResponse.access_token;

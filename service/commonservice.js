@@ -30,7 +30,7 @@ exports.connectSFDC = function (data, callback) {
 		    endpoint: data.endpoint
 	});
 	client.login(function(err, response, lastRequest) {
-	    if (client.userId) {
+	    if (!err) {
 			callback(null,client);
 	    } else {
 			callback(err,null);
