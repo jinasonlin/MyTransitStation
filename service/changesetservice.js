@@ -259,13 +259,14 @@ exports.addValidation = function(data, options){
 				} else {
 					if(validation && validation._id){
 						var params = {
-							//status : "block"
+							status : "inProcess"
 						};
 						updateValidation(validation._id, params, function(err){
 							if(err) options.response(err);
 							else options.response("done");
 
-							deploy(data.targetSFConnId, data.archiveId, data.session.user._id, true, function(e){console.log(e);});
+							deploy(data.scID, data.targetSFConnId, data.archiveId, data.session.user._id, validation._id, true,
+								function(e){console.log(tag + "<-------> Validation callback : " +e);});
 						});
 					}else{
 						options.response("done");
@@ -491,12 +492,16 @@ var checkObject = function (obj) {
 	}
 };
 
+var getArchive = function (id, callback) {
+	Archive.findById(id, callback);
+};
 
 //callback err: 1(fail,can retry action) 0(done) -1(err,action will never sucess)
 var archiveZip = function(csId, sfconnId, archiveId, userId, callback){
-	var setAchiveStatus = function (status) {
+	var setAchiveStatus = function (status, s3Key) {
 		var params = {
-			status : status
+			status : status,
+			s3Key : s3Key
 		};
 		updateArchive(archiveId, params, function (){
 			updateCSArchiveStatus(csId, function(e){ if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);});
@@ -558,12 +563,10 @@ var archiveZip = function(csId, sfconnId, archiveId, userId, callback){
 													setAchiveStatus("fail");
 													callback("uplaodData error" + err);
 												} else {
-													callback("uplaodData success");	
-													setAchiveStatus("done");
+													setAchiveStatus("done", key);
+													callback(null, "uplaodData success");
 												}
 											});
-											//setAchiveStatus("done");
-											//callback(0);
 										}
 									});
 								}
@@ -619,76 +622,120 @@ var retrieveData = function(client,opts,fileName,callback){
 					console.log(tag + "checkStatus of download state : "+result1.state);
 				}
 			});
-		},1000);
+		},15000);
 	});
 };
 
 //callback err: 1(fail,can retry action) 0(done) -1(err,action will never sucess)
-var deploy = function(targetSFConnId,archiveId,userId,checkOnly,callback){
+var deploy = function(csId, targetSFConnId, archiveId, userId, validationId, checkOnly, callback){
+	var setDeplymentStatus = function (status) {
+		var params = {
+			status : status
+		};
+		updateValidation(validationId, params, function (err){
+			updateCSValidateStatus(csId, function(e){ if(e) console.warn(tag + "updateCSValidateStatus ->" + e);});
+		});
+	};
+
 	var zipFileName = userId+"_"+archiveId+".zip";
 	var path = __dirname + "/../temp/" + zipFileName;
-	CommonService.checkFileExists(path,function(exists){
-		if(!exists)callback(1);
-		else{
-			console.log("find file "+zipFileName + " on disk.");
-			Account.findById(targetSFConnId,function(err,sfconn){
-				if (err) {
-					callback(-1);
+
+	/**************TODO**********/
+	getArchive(archiveId, function(err, archive) {
+		if(err)	{
+			setDeplymentStatus("fail");
+			callback("getArchive err" + err);
+		} else {
+			S3service.downloadData(archive.s3Key, function (err) {
+				if(err) {
+					setDeplymentStatus("fail");
+					callback("download file from S3 fail" + err);
 				} else {
-					CommonService.connectSFDC(sfconn,function(err,client){
-						if(err)callback(-1);
-						else{
-							console.log("connect to sfdc sucess");
-							fs.readFile(path, {encoding:"base64"},function(err,data){
-								if(err)callback(1);
-								else{
-									console.log("begin do deploy");
-									var deployOptions = {
-										rollbackOnError : true,
-										runAllTests : true,
-										ignoreWarnings : false,
-										purgeOnDelete : true
-									};
-									//if(checkOnly){
-										deployOptions.checkOnly = true;
-									//}
-									client.deploy({
-										zipFile : data,
-										deployOptions : deployOptions
-									},function(err,response,request){
-										if(err) callback(1);
-										else{
-											var result = response.result;
-											var intervalId = setInterval(function(){
-												client.checkStatus({Id:result.id},function(err,resp,reqs){
-													var result1 = resp.result[0];
-													if(result1.done){
-														console.log("deploy action complete");
-														clearInterval(intervalId);
-														console.log("stop interval");
-														client.checkDeployStatus({
-															Id : result.id,
-															includeDetails : true
-														},function(err,resp1,req1){
-															if(resp1 && resp1.result && resp1.result.details){
-																console.log(resp1.result.details);
-																callback(0,resp1.result.details);
-															}
-															if(err) callback(1);
-														});
-													}else{
-														console.log("check deploy status . state :"+result1.state);
-													}
-												});
-											},5000);
-										}
-									});
-								}
-							});
-						}
-					});
+					console.log(tag + "download file from S3 success");
+					//callback("download file from S3 success");
+					todoDeploy();
 				}
 			});
 		}
 	});
+
+	var todoDeploy = function () {
+		CommonService.checkFileExists(path,function(exists){
+			if(!exists) {
+				setDeplymentStatus("fail");
+				callback(path + " is not exists");
+			} else {
+				console.log(tag + "find file "+zipFileName + " on disk.");
+				Account.findById(targetSFConnId,function(err,sfconn){
+					if (err) {
+						setDeplymentStatus("fail");
+						callback("target Account find err");
+					} else {
+						CommonService.connectSFDC(sfconn,function(err,client){
+							if(err) {
+								setDeplymentStatus("fail");
+								callback("target Account cannot connect salesforce" + err);
+							} else {
+								console.log(tag + "connect to sfdc sucess");
+								fs.readFile(path, {encoding:"base64"},function(err,data){
+									if(err) {
+										setDeplymentStatus("fail");
+										callback("read file error");
+									} else {
+										console.log(tag + "begin do deploy");
+										var deployOptions = {
+											rollbackOnError : true,
+											runAllTests : true,
+											ignoreWarnings : false,
+											purgeOnDelete : true
+										};
+										//if(checkOnly){
+											deployOptions.checkOnly = true;
+										//}
+										client.deploy({
+											zipFile : data,
+											deployOptions : deployOptions
+										},function(err,response,request){
+											if(err) {
+												setDeplymentStatus("fail");
+												callback("deploy error");
+											} else {
+												var result = response.result;
+												var intervalId = setInterval(function(){
+													client.checkStatus({Id:result.id},function(err,resp,reqs){
+														var result1 = resp.result[0];
+														if(result1.done){
+															console.log(tag + "deploy action complete");
+															clearInterval(intervalId);
+															console.log(tag + "stop interval");
+															client.checkDeployStatus({
+																	Id : result.id,
+																	includeDetails : true
+																},function(err,resp1,req1){
+																	if(err) {
+																		setDeplymentStatus("fail");
+																		callback("checkDeployStatus");
+																	}
+																	if(resp1 && resp1.result && resp1.result.details){
+																		console.log(resp1.result.details);
+																		setDeplymentStatus("done");
+																		callback(null, resp1.result.details);
+																	}
+																});
+														}else{
+															console.log(tag + "check deploy status . state :"+result1.state);
+														}
+													});
+												},15000);
+											}
+										});
+									}
+								});
+							}
+						});
+					}
+				});
+			}
+		});
+	};
 };

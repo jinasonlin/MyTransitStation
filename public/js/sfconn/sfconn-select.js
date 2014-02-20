@@ -35,5 +35,10 @@ $(document).ready(function(){
 			archiveId : $("#archiveId").val(),
 			targetSFConnId : $("#sfconn-select .choosedSFConn").val()
 		};
+		$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
+			if("done" == data){
+				location.reload(true);
+			}	
+		});
 	});
 });

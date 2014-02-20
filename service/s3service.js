@@ -40,7 +40,7 @@ exports.uplaodData = function(fileName,callback){
 							if(err)callback(err);
 							else{
 								console.log(tag + 'save file to s3 done');
-								callback(null,opts.key);
+								callback(null, opts.Key);
 								fs.unlinkSync(filePath);
 								buff.fill('');
 								console.log(tag + 'delete temp file ' + filePath);
@@ -55,6 +55,7 @@ exports.uplaodData = function(fileName,callback){
 };
 
 exports.downloadData = function(s3key,callback){
+	console.log(tag + 's3key = ' + s3key);
 	var path = __dirname + '/../temp';
 	if(!S3){
 		S3 = new aws.S3();
@@ -74,15 +75,15 @@ exports.downloadData = function(s3key,callback){
 					ResponseContentEncoding :'base64'
 				};
 				console.log(tag + 'begin to doload file '+ s3key +' from s3');
-				S3.putObject(opts,function(err,data){
+				S3.getObject(opts,function(err,data){
 					if(err) {
 						callback(err);
 					} else {
-						CommonService.confirmDirExists(path, function(err,data){
-							if(err) {
-								callback(err);
+						CommonService.confirmDirExists(path, function(exists, info){
+							if(!exists) {
+								callback(info);
 							} else {
-								fs.writeFile(path + '/' + s3key.split('\/').jion('_'), {encoding:'base64'}, function(err){
+								fs.writeFile(path + '/' + s3key.replace(/\//g,'_'), data.Body,{encoding:'base64'}, function(err){
 									if(err) callback(err);
 									else callback(null,'FilePrepared');
 								});
