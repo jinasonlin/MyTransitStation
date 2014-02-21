@@ -76,42 +76,20 @@ $(document).ready(function(){
 		});
 	});
 
-	/******************************* test ***************************/
-		$(".archive-validate").bind("click",function(){
-			var csId = $("#csId").val();
-			var archiveId = $(this).parent().parent().attr("id");
-			$("#archiveId").val(archiveId);
-			/*var data = {
-				name : "validation1",
-				archiveId : archiveId,
-				targetSFConnId : "5302d67b0b99d702008fe7c8" 
-			};
-			console.log(archiveId);*/
-			/*$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
-				if("done" == data){
-					location.reload(true);
-				}	
-			});*/
-			$("#sfconn-select").modal("show");
-		});
-		$(".archive-deploy").bind("click",function(){
-			var csId = $("#csId").val();
-			var archiveId = $(this).parent().parent().attr("id");
-			$("#archiveId").val(archiveId);
-			/*var data = {
-				name : "deploy1",
-				archiveId : archiveId,
-				targetSFConnId : "5302d67b0b99d702008fe7c8" 
-			};
-			console.log(archiveId);*/
-			/*$.post("/changeSets/" + csId+ "/deployment", data).done(function (data) {
-				console.log(data);
-				if("done" == data){
-					location.reload(true);
-				}	
-			});*/
-			$("#sfconn-select").modal("show");
-		});
+	$(".archive-validate").bind("click",function(){
+		var csId = $("#csId").val();
+		var archiveId = $(this).parent().parent().attr("id") ? $(this).parent().parent().attr("id") : null;
+		$("#archiveId").val(archiveId);
+		$("#requestType").val("validation");
+		$("#sfconn-select").modal("show");
+	});
+	$(".archive-deploy").bind("click",function(){
+		var csId = $("#csId").val();
+		var archiveId = $(this).parent().parent().attr("id") ? $(this).parent().parent().attr("id") : null;
+		$("#archiveId").val(archiveId);
+		$("#requestType").val("deployment");
+		$("#sfconn-select").modal("show");
+	});
 });
 
 var opts = {
