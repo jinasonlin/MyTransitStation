@@ -214,8 +214,12 @@ exports.addArchive = function(data, options){
 							if(err) options.response(err);
 							else options.response("done");
 
-							archiveZip(data.csId, global.sfconn._id, archive._id, data.session.user._id,
-								function(e){console.log(tag + "<-------> archiveZip callback : " +e);});
+							archiveZip(data.csId, global.sfconn._id, archive._id, data.session.user._id, false,
+								function(e, key){
+									console.log(tag + "<-------> archiveZip callback : " +e);
+									if(e) updateAchiveStatus(archive._id, data.csId, "fail");
+									else updateAchiveStatus(archive._id, data.csId, "done", key);
+								});
 						});
 					}else{
 						options.response("done");
@@ -253,9 +257,10 @@ exports.addValidation = function(data, options){
 				archiveId: data.archiveId,
 				targetSFConnId : data.targetSFConnId
 			};
+			checkObject(newValidation);
 			new Validation(newValidation).save(function(err, validation){
 				if (err) {
-					options.response("Save Error.Cant't handle this validation save request.");
+					options.response("Save Error.Cant't handle this validation save request." + err);
 				} else {
 					if(validation && validation._id){
 						var params = {
@@ -265,8 +270,12 @@ exports.addValidation = function(data, options){
 							if(err) options.response(err);
 							else options.response("done");
 
-							deploy(data.scID, data.targetSFConnId, data.archiveId, data.session.user._id, validation._id, true,
-								function(e){console.log(tag + "<-------> Validation callback : " +e);});
+							deploy(data.csId, data.targetSFConnId, data.archiveId, data.session.user._id, true,
+								function(e){
+									console.log(tag + "<-------> Validation callback : " +e);
+									if (e) updateDeplymentStatus(validation._id, data.csId, "fail");
+									else updateDeplymentStatus(validation._id, data.csId, "done");
+								});
 						});
 					}else{
 						options.response("done");
@@ -344,6 +353,16 @@ exports.deleteDeployment = function(data, options){
 
 /* ------------------ built-in function -------------------- */
 		/* ===== part of archive db ====== */
+var updateAchiveStatus = function (archiveId, csId, status, s3Key) {
+	var params = {
+		status : status,
+		s3Key : s3Key
+	};
+	updateArchive(archiveId, params, function (){
+		updateCSArchiveStatus(csId, function(e){ if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);});
+	});
+};
+
 var updateArchive = function(archiveId, data, callback){
 	checkObject(data);
 	Archive.findById(archiveId,function(err,archive){
@@ -356,6 +375,15 @@ var updateArchive = function(archiveId, data, callback){
 };
 
 		/* ===== part of validation db ====== */
+var updateDeplymentStatus = function (validationId, csId, status) {
+	var params = {
+		status : status
+	};
+	updateValidation(validationId, params, function (err){
+		updateCSValidateStatus(csId, function(e){ if(e) console.warn(tag + "updateCSValidateStatus ->" + e);});
+	});
+};
+
 var updateValidation = function(validationId, data, callback){
 	checkObject(data);
 	Validation.findById(validationId,function(err, validation){
@@ -486,7 +514,7 @@ var updateCSDeployStatus = function(csId,callback){
 /* ----------------------- utility -------------------------- */
 var checkObject = function (obj) {
 	for (var i in obj) {
-		if (obj[i] === null || obj[i] === undefined) {
+		if (obj[i] === null || obj[i] === undefined || obj[i] === "") {
 			delete obj[i];
 		}
 	}
@@ -496,41 +524,27 @@ var getArchive = function (id, callback) {
 	Archive.findById(id, callback);
 };
 
-//callback err: 1(fail,can retry action) 0(done) -1(err,action will never sucess)
-var archiveZip = function(csId, sfconnId, archiveId, userId, callback){
-	var setAchiveStatus = function (status, s3Key) {
-		var params = {
-			status : status,
-			s3Key : s3Key
-		};
-		updateArchive(archiveId, params, function (){
-			updateCSArchiveStatus(csId, function(e){ if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);});
-		});
-	};
-
+/***************************** connection salesforce & S3 *******************************/
+var archiveZip = function(csId, sfconnId, archiveId, userId, nativeOnly, callback){
 	var zipFileName = userId+"_"+archiveId+".zip";
 	Account.findById(sfconnId,"-fileInfo",function(err,sfconn){
 		if(err || sfconn === null){
-			setAchiveStatus("fail");
 			callback("cannot find the account");
 		} else {
 			console.log(tag + "find sfconn "+sfconn.userName);
 			CommonService.connectSFDC(sfconn,function(err,client){
 				if(err) {
-					setAchiveStatus("fail");
 					callback("connect the org fail");
 				}
 				if(client){
 					console.log(tag + "login sf with "+sfconn.userName);
-					Archive.findById(archiveId,function(err,archive){
-						if(err || archive === null){
-							setAchiveStatus("fail");
-							callback("find archive fail");
-						}else{
-							console.log(tag + "find archive " + archive.name + " id" + archive._id);
-							ChangeSet.findById(archive.changeSetId,function(err,changeSet){
+					// Archive.findById(archiveId,function(err,archive){
+					// 	if(err || archive === null){
+					// 		callback("find archive fail");
+					// 	}else{
+					// 		console.log(tag + "find archive " + archive.name + " id" + archive._id);
+							ChangeSet.findById(csId, function(err,changeSet){
 								if(err || changeSet === null || changeSet.files === null){
-									setAchiveStatus("fail");
 									callback("find changeSet fail");
 								}else{
 									console.log(tag + "find ChangeSet "+changeSet.name + " id " + changeSet._id);
@@ -555,24 +569,25 @@ var archiveZip = function(csId, sfconnId, archiveId, userId, callback){
 									console.log(tag + "begin retrieve data");
 									retrieveData(client, opts, zipFileName, function(err){
 										if(err) {
-											setAchiveStatus("fail");
 											callback(err);
 										} else {
-											S3service.uplaodData(zipFileName, function(err, key){
-												if(err) {
-													setAchiveStatus("fail");
-													callback("uplaodData error" + err);
-												} else {
-													setAchiveStatus("done", key);
-													callback(null, "uplaodData success");
-												}
-											});
+											if(nativeOnly) {
+												callback(null);
+											} else {
+												S3service.uplaodData(zipFileName, function(err, key){
+													if(err) {
+														callback("uplaodData error" + err);
+													} else {
+														callback(null, key);
+													}
+												});
+											}
 										}
 									});
 								}
 							});
-						}
-					});
+					// 	}
+					// });
 				}
 			});
 		}
@@ -626,60 +641,59 @@ var retrieveData = function(client,opts,fileName,callback){
 	});
 };
 
-//callback err: 1(fail,can retry action) 0(done) -1(err,action will never sucess)
-var deploy = function(csId, targetSFConnId, archiveId, userId, validationId, checkOnly, callback){
-	var setDeplymentStatus = function (status) {
-		var params = {
-			status : status
-		};
-		updateValidation(validationId, params, function (err){
-			updateCSValidateStatus(csId, function(e){ if(e) console.warn(tag + "updateCSValidateStatus ->" + e);});
-		});
-	};
-
+var deploy = function(csId, targetSFConnId, archiveId, userId, checkOnly, callback){
 	var zipFileName = userId+"_"+archiveId+".zip";
 	var path = __dirname + "/../temp/" + zipFileName;
 
-	/**************TODO**********/
-	getArchive(archiveId, function(err, archive) {
-		if(err)	{
-			setDeplymentStatus("fail");
-			callback("getArchive err" + err);
-		} else {
-			S3service.downloadData(archive.s3Key, function (err) {
+	if (!archiveId) {
+		archiveId = "realtime";
+		zipFileName = userId+"_"+archiveId+".zip";
+		path = __dirname + "/../temp/" + zipFileName;
+
+		archiveZip(csId, global.sfconn._id, archiveId, userId, true,
+			function(err, key){
 				if(err) {
-					setDeplymentStatus("fail");
-					callback("download file from S3 fail" + err);
+					callback("archiveZip fail " + err);
 				} else {
-					console.log(tag + "download file from S3 success");
-					//callback("download file from S3 success");
+					console.log(tag + "archiveZip success");
 					todoDeploy();
 				}
 			});
-		}
-	});
+	} else {
+		getArchive(archiveId, function(err, archive) {
+			if(err)	{
+				callback("getArchive err" + err);
+			} else {
+				S3service.downloadData(archive.s3Key, function (err) {
+					if(err) {
+						callback("download file from S3 fail" + err);
+					} else {
+						console.log(tag + "download file from S3 success");
+						//callback("download file from S3 success");
+						todoDeploy();
+					}
+				});
+			}
+		});
+	}
 
 	var todoDeploy = function () {
 		CommonService.checkFileExists(path,function(exists){
 			if(!exists) {
-				setDeplymentStatus("fail");
 				callback(path + " is not exists");
 			} else {
 				console.log(tag + "find file "+zipFileName + " on disk.");
 				Account.findById(targetSFConnId,function(err,sfconn){
 					if (err) {
-						setDeplymentStatus("fail");
 						callback("target Account find err");
 					} else {
 						CommonService.connectSFDC(sfconn,function(err,client){
 							if(err) {
-								setDeplymentStatus("fail");
 								callback("target Account cannot connect salesforce" + err);
 							} else {
 								console.log(tag + "connect to sfdc sucess");
 								fs.readFile(path, {encoding:"base64"},function(err,data){
 									if(err) {
-										setDeplymentStatus("fail");
 										callback("read file error");
 									} else {
 										console.log(tag + "begin do deploy");
@@ -697,7 +711,6 @@ var deploy = function(csId, targetSFConnId, archiveId, userId, validationId, che
 											deployOptions : deployOptions
 										},function(err,response,request){
 											if(err) {
-												setDeplymentStatus("fail");
 												callback("deploy error");
 											} else {
 												var result = response.result;
@@ -713,12 +726,10 @@ var deploy = function(csId, targetSFConnId, archiveId, userId, validationId, che
 																	includeDetails : true
 																},function(err,resp1,req1){
 																	if(err) {
-																		setDeplymentStatus("fail");
 																		callback("checkDeployStatus");
 																	}
 																	if(resp1 && resp1.result && resp1.result.details){
 																		console.log(resp1.result.details);
-																		setDeplymentStatus("done");
 																		callback(null, resp1.result.details);
 																	}
 																});
@@ -738,4 +749,10 @@ var deploy = function(csId, targetSFConnId, archiveId, userId, validationId, che
 			}
 		});
 	};
+};
+
+
+//TODO
+var removeFile = function (filePath) {
+
 };

@@ -32,13 +32,15 @@ $(document).ready(function(){
 		var csId = $("#csId").val();
 		var data = {
 			name : $("#sfconn-select .name").val(),
-			archiveId : $("#archiveId").val(),
+			archiveId : $("#archiveid").val(),
 			targetSFConnId : $("#sfconn-select .choosedSFConn").val()
 		};
 		$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
 			if("done" == data){
 				location.reload(true);
-			}	
+			} else {
+				console.log(data);
+			}
 		});
 	});
 });
