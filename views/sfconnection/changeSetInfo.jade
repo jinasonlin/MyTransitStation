@@ -30,8 +30,8 @@ block content
             .col-md-7.pull-right(style="padding-top: 3px;text-align:center;")
               button.btn.btn-sm.btn-primary.archive(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#single-name") Archive
               //if changeSet.validateStatus!='block'&&changeSet.deployStatus!='block'
-              button.btn.btn-sm.btn-primary.validate(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#sfconn-select") Validate
-              button.btn.btn-sm.btn-primary.deploy(type="button",style="margin-left:4px;",data-toggle="modal",data-target="#sfconn-select") Deploy
+              button.btn.btn-sm.btn-primary.archive-validate(type="button",style="margin-left:4px;") Validate
+              button.btn.btn-sm.btn-primary.archive-deploy(type="button",style="margin-left:4px;") Deploy
               //else
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Validate
                 button.btn.btn-sm.btn-warning(type="button",style="margin-left:4px;",title="This is an validation/deployment in processing.") Deploy
