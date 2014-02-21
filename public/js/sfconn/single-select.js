@@ -33,7 +33,7 @@ function oauthProduction(id) {
 	var loginUrl = "https://login.salesforce.com/";
 	var clientId = "3MVG9Y6d_Btp4xp7ZOesaztHpuKJTdGVM86i1KD.CafBzBowRXP0mAs_oSTxvQrJRXJMVh3pT1oDaLMe7D_Nh";
 	var	redirectUri = "https://migrationtool-staging.herokuapp.com/authcallback";
-	if(document.URL.search("localhost")){
+	if(document.URL.indexOf("localhost") !== -1 || document.URL.indexOf("127.0.0.1") !== -1) {
 		clientId = "3MVG9Y6d_Btp4xp4eO2jujCUfEWdyWextljrhi5gB0G7gIaieua03FNx15oOJpTCI7ASBrq3v11NJ_9peAmlC";
 		redirectUri = "http://localhost:5000/authcallback";
 	}
