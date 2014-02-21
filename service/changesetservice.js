@@ -205,20 +205,30 @@ exports.addArchive = function(data, options){
 				if (err) {
 					options.response("Save Error.Cant't handle this archive save request.");
 				} else {
-					updateCSArchiveStatus(data.csId, function(e){ if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);});
 					if(archive && archive._id){
 						var params = {
 							status : "inProcess"
 						};
-						updateArchive(archive._id, params, function(err){
+						updateArchive(archive._id, params, data.csId, function(err){
 							if(err) options.response(err);
 							else options.response("done");
 
 							archiveZip(data.csId, global.sfconn._id, archive._id, data.session.user._id, false,
 								function(e, key){
 									console.log(tag + "<-------> archiveZip callback : " +e);
-									if(e) updateAchiveStatus(archive._id, data.csId, "fail");
-									else updateAchiveStatus(archive._id, data.csId, "done", key);
+									var params;
+									if(e) {
+										params = {
+											status : "fail",
+											archiveErrorInfo : e
+										};
+									} else {
+										params = {
+											status : "done",
+											s3Key : key
+										};
+									}
+									updateArchive(archive._id, params, data.csId);
 								});
 						});
 					}else{
@@ -266,15 +276,25 @@ exports.addValidation = function(data, options){
 						var params = {
 							status : "inProcess"
 						};
-						updateValidation(validation._id, params, function(err){
+						updateValidation(validation._id, params, data.csId, function(err){
 							if(err) options.response(err);
 							else options.response("done");
 
 							deploy(data.csId, data.targetSFConnId, data.archiveId, data.session.user._id, true,
 								function(e){
 									console.log(tag + "<-------> Validation callback : " +e);
-									if (e) updateDeplymentStatus(validation._id, data.csId, "fail");
-									else updateDeplymentStatus(validation._id, data.csId, "done");
+									var params;
+									if(e) {
+										params = {
+											status : "fail",
+											validateErrorInfo : e
+										};
+									} else {
+										params = {
+											status : "done"
+										};
+									}
+									updateValidation(validation._id, params, data.csId);
 								});
 						});
 					}else{
@@ -353,42 +373,37 @@ exports.deleteDeployment = function(data, options){
 
 /* ------------------ built-in function -------------------- */
 		/* ===== part of archive db ====== */
-var updateAchiveStatus = function (archiveId, csId, status, s3Key) {
-	var params = {
-		status : status,
-		s3Key : s3Key
-	};
-	updateArchive(archiveId, params, function (){
-		updateCSArchiveStatus(csId, function(e){ if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);});
-	});
-};
-
-var updateArchive = function(archiveId, data, callback){
+var updateArchive = function(archiveId, data, csId, callback){
 	checkObject(data);
 	Archive.findById(archiveId,function(err,archive){
 		if(archive){
 			archive.update(data, function(err){
-				if(!err && callback) callback();
+				if (err) console.warn(tag + "updateArchive ->" + err);
+
+				updateCSArchiveStatus(csId, function(e){
+					if(e) console.warn(tag + "updateCSArchiveStatus ->" + e);
+				});
+
+				if(callback) callback(err);
 			});
 		}
 	});
 };
 
 		/* ===== part of validation db ====== */
-var updateDeplymentStatus = function (validationId, csId, status) {
-	var params = {
-		status : status
-	};
-	updateValidation(validationId, params, function (err){
-		updateCSValidateStatus(csId, function(e){ if(e) console.warn(tag + "updateCSValidateStatus ->" + e);});
-	});
-};
-
-var updateValidation = function(validationId, data, callback){
+var updateValidation = function(validationId, data, csId, callback){
 	checkObject(data);
 	Validation.findById(validationId,function(err, validation){
 		if(validation){
-			validation.update(data, callback);
+			validation.update(data, function(err) {
+				if (err) console.warn(tag + "updateValidation ->" + err);
+
+				updateCSValidateStatus(csId, function(e){
+					if(e) console.warn(tag + "updateCSValidateStatus ->" + e);
+				});
+
+				if(callback) callback(err);
+			});
 		}
 	});
 };

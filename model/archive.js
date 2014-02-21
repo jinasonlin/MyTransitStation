@@ -1,6 +1,6 @@
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema
-  , ObjectId = Schema.ObjectId;
+var mongoose = require('mongoose'),
+  Schema = mongoose.Schema,
+  ObjectId = Schema.ObjectId;
  
 var Archive = new Schema({
   name : String ,
@@ -10,7 +10,8 @@ var Archive = new Schema({
   s3Key : {type : String , default : null},
   status : {type : String , default : 'new'},
   validateStatus : {type : String , default : 'none'},
-  deployStatus : {type : String , default : 'none'}
+  deployStatus : {type : String , default : 'none'},
+  archiveErrorInfo : {type : String , default : ''}
 });
  
 module.exports = mongoose.model('Archive', Archive);

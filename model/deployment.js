@@ -1,6 +1,6 @@
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema
-  , ObjectId = Schema.ObjectId;
+var mongoose = require('mongoose'),
+  Schema = mongoose.Schema,
+  ObjectId = Schema.ObjectId;
  
 var Deployment = new Schema({
   name : String ,
@@ -10,6 +10,7 @@ var Deployment = new Schema({
   archiveId: {type: ObjectId, default: null},
   status : {type : String , default : 'new'},
   targetSFConnId : {type: ObjectId, default: null},
+  deployErrorInfo : {type : String , default : ''},
   deployResult : { type : Array , default : []}
 });
  

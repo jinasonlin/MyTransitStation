@@ -77,7 +77,7 @@ block content
                           if archive.status=='new'||archive.status=='inProcess'
                             i(title="Processing").icon-large.icon-spinner.icon-spin
                           else 
-                            |#{archive.status}
+                            span(title="#{archive.archiveErrorInfo}")|#{archive.status}
                         td 
                           if archive.status=='done'
                             button.btn.btn-xs.btn-primary.bakvalidate.archive-validate(style="margin-left: 6px;") Validate
@@ -122,7 +122,7 @@ block content
                           if validate.status=='new'||validate.status=='inProcess'
                             i(title="Processing").icon-large.icon-spinner.icon-spin
                           else 
-                            |#{validate.status}
+                            span(title="#{validate.validateErrorInfo}")|#{validate.status}
                         td
                           if validate.status=='inProcess'
                             button.btn.btn-xs.btn-info(style="margin-left: 6px;") Cancel
@@ -160,7 +160,7 @@ block content
                           if deploy.status=='new'||deploy.status=='inProcess'
                             i(title="Processing").icon-large.icon-spinner.icon-spin
                           else 
-                            |#{deploy.status}
+                            span(title="#{deploy.deployErrorInfo}")|#{deploy.status}
                         td
                           if deploy.status=='inProcess'
                             button.btn.btn-xs.btn-info(style="margin-left: 6px;") Cancel
