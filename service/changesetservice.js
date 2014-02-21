@@ -281,7 +281,7 @@ exports.addValidation = function(data, options){
 							else options.response("done");
 
 							deploy(data.csId, data.targetSFConnId, data.archiveId, data.session.user._id, true,
-								function(e){
+								function(e, result){
 									console.log(tag + "<-------> Validation callback : " +e);
 									var params;
 									if(e) {
@@ -291,7 +291,8 @@ exports.addValidation = function(data, options){
 										};
 									} else {
 										params = {
-											status : "done"
+											status : "done",
+											validateResult : result
 										};
 									}
 									updateValidation(validation._id, params, data.csId);
@@ -332,6 +333,7 @@ exports.addDeployment = function(data, options){
 				archiveId: data.archiveId,
 				targetSFConnId : data.target
 			};
+			checkObject(newDeployment);
 			new Deployment(newDeployment).save(function(err, deployment){
 				console.log(deployment);
 				if (err) {
@@ -339,13 +341,29 @@ exports.addDeployment = function(data, options){
 				} else {
 					if(deployment && deployment._id){
 						var params = {
-							//status : "block"
+							status : "inProcess"
 						};
-						updateDeployment(deployment._id, params, function(err){
+						updateDeployment(deployment._id, params, data.csId, function(err){
 							if(err) options.response(err);
 							else options.response("done");			
 
-							//deploy(data.target, data.archive, data.session.user._id, false, function(e){console.log(e);});
+							deploy(data.csId, data.targetSFConnId, data.archiveId, data.session.user._id, true,
+								function(e, result){
+									console.log(tag + "<-------> Deployment callback : " +e);
+									var params;
+									if(e) {
+										params = {
+											status : "fail",
+											deployErrorInfo : e
+										};
+									} else {
+										params = {
+											status : "done",
+											deployResult : result
+										};
+									}
+									updateDeployment(deployment._id, params, data.csId);
+								});
 						});
 					}else{
 						options.response("done");
@@ -409,11 +427,19 @@ var updateValidation = function(validationId, data, csId, callback){
 };
 
 		/* ===== part of deployment db ====== */
-var updateDeployment = function(deploymentId, data, callback){
+var updateDeployment = function(deploymentId, data, csId, callback){
 	checkObject(data);
 	Deployment.findById(deploymentId,function(err,deployment){
 		if(deployment){
-			deployment.update(data, callback);
+			deployment.update(data, function(err) {
+				if (err) console.warn(tag + "updateDeployment ->" + err);
+
+				updateCSDeployStatus(csId, function(e){
+					if(e) console.warn(tag + "updateCSDeployStatus ->" + e);
+				});
+
+				if(callback) callback(err);
+			});
 		}
 	});
 };
