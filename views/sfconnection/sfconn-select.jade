@@ -11,12 +11,14 @@ script(type='text/javascript',src="/js/sfconn/sfconn-select.js")
         .row  
           .col-sm-3.col-md-3.col-sm-offset-1.col-md-offset-1(style="padding-top: 6px;")
             label.control-label.pull-right Name 
-          .col-sm-6.col-md-6
+          .col-sm-6.col-md-6.nameClass
             input.name.form-control(type="text",placeholder="Name")
         .row(style="margin-top:10px;")
-          .col-sm-3.col-md-3.col-sm-offset-1.col-md-offset-1
+          .col-sm-3.col-md-3.col-sm-offset-1.col-md-offset-1(style="padding-top: 6px;")
             label.control-label.pull-right SFConnection 
-          .col-sm-7.col-md-7.choosedSFConn(value="") None Choosed
+          //.col-sm-7.col-md-7.choosedSFConn(value="") None Choosed
+          .col-sm-7.col-md-7.choosedSFConnId
+            input.choosedSFConn.form-control(type="text",value="None Choosed",disabled,style=" border: 0px; background: white; ")
         .row
           .col-sm-7.col-sm-offset-4.col-md-7.col-md-offset-4 
             if sfconns && sfconns.length>0
