@@ -22,14 +22,13 @@ $(document).ready(function(){
 		$("#sfconn-select .choosedSFConn").val("None Choosed");
 		$(".choosedSFConn").attr("style","border:0px;background: white");
 	});
-	$("#sfconn-select .submit").bind("click", function () {  
+	$("#sfconn-select .new").bind("click", function () {  
 		if($("#sfconn-select .name").val() === ""){
 			$("#sfconn-select .nameClass").addClass("has-error");
 		}else if($("#sfconn-select .choosedSFConn").val() == "None Choosed"){
 			$(".choosedSFConn").attr("style","background: white");
 			$(".choosedSFConnId").addClass("has-error");
 			$("#sfconn-select .nameClass").removeClass("has-error");
-			//console.log($("#sfconn-select input:radio:checked").val() == "undefined");
 		}else{
 
 			$("#sfconn-select .nameClass").removeClass("has-error");
@@ -42,7 +41,7 @@ $(document).ready(function(){
 				targetSFConnId : $(".choosedSFConnId").val()
 			};
 			console.log(data);
-			}
+		}
 		/*$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
 			if("done" == data){
 				location.reload(true);
@@ -50,19 +49,32 @@ $(document).ready(function(){
 		});*/
 	});
 	$("#sfconn-select .submit").bind("click", function () {
-		console.log("click submit " + $("#archiveId").val());
-		var csId = $("#csId").val();
-		var data = {
-			name : $("#sfconn-select .name").val(),
-			archiveId : $("#archiveid").val(),
-			targetSFConnId : $("#sfconn-select .choosedSFConn").val()
-		};
-		$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
-			if("done" == data){
-				location.reload(true);
-			} else {
-				console.log(data);
-			}
-		});
+		if($("#sfconn-select .name").val() === ""){
+			$("#sfconn-select .nameClass").addClass("has-error");
+		}else if($("#sfconn-select .choosedSFConn").val() == "None Choosed"){
+			$(".choosedSFConn").attr("style","background: white");
+			$(".choosedSFConnId").addClass("has-error");
+			$("#sfconn-select .nameClass").removeClass("has-error");
+		}else{
+
+			$("#sfconn-select .nameClass").removeClass("has-error");
+			$(".choosedSFConnId").removeClass("has-error");
+			console.log("click new " + $("#archiveId").val());
+			var csId = $("#csId").val();
+			var data = {
+				name : $("#sfconn-select .name").val(),
+				archiveId : $("#archiveId").val(),
+				targetSFConnId : $(".choosedSFConnId").val()
+			};
+			console.log(data);
+
+			$.post("/changeSets/" + csId+ "/validation", data).done(function (data) {
+				if("done" == data){
+					location.reload(true);
+				} else {
+					console.log(data);
+				}
+			});
+		}
 	});
 });
