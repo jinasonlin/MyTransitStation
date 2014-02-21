@@ -1,6 +1,5 @@
 "use strict";
 var tempOrgName, orgId;
-
 $(document).ready(function(){
 	function checkInputName () {
 		var inputName = $("#single-select input.name").val();
