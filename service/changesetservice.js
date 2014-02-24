@@ -579,56 +579,50 @@ var archiveZip = function(csId, sfconnId, archiveId, userId, nativeOnly, callbac
 				}
 				if(client){
 					console.log(tag + "login sf with "+sfconn.userName);
-					// Archive.findById(archiveId,function(err,archive){
-					// 	if(err || archive === null){
-					// 		callback("find archive fail");
-					// 	}else{
-					// 		console.log(tag + "find archive " + archive.name + " id" + archive._id);
-							ChangeSet.findById(csId, function(err,changeSet){
-								if(err || changeSet === null || changeSet.files === null){
-									callback("find changeSet fail");
-								}else{
-									console.log(tag + "find ChangeSet "+changeSet.name + " id " + changeSet._id);
-									var opts = {
-										apiVersion : 29.0,
-										unpackaged : {}
+					ChangeSet.findById(csId, function(err,changeSet){
+						if(err || changeSet === null || changeSet.files === null){
+							callback("find changeSet fail");
+						}else{
+							console.log(tag + "find ChangeSet "+changeSet.name + " id " + changeSet._id);
+							var opts = {
+								apiVersion : 29.0,
+								unpackaged : {}
+							};
+							var unpackagedTypes = [];
+							for(var j=0;j<changeSet.files.length;j++){
+								var fileInfo = changeSet.files[j];
+								var packName = fileInfo.packName;
+								for(var i=0;i<fileInfo.files.length;i++){
+									var fileName = (fileInfo.files[i].split("/")[1]).split(".")[0];
+									var upackType = {
+										members : fileName,
+										name : packName
 									};
-									var unpackagedTypes = [];
-									for(var j=0;j<changeSet.files.length;j++){
-										var fileInfo = changeSet.files[j];
-										var packName = fileInfo.packName;
-										for(var i=0;i<fileInfo.files.length;i++){
-											var fileName = (fileInfo.files[i].split("/")[1]).split(".")[0];
-											var upackType = {
-												members : fileName,
-												name : packName
-											};
-											unpackagedTypes.push(upackType);
-										}
-									}
-									opts.unpackaged.types = unpackagedTypes;
-									console.log(tag + "begin retrieve data");
-									retrieveData(client, opts, zipFileName, function(err){
-										if(err) {
-											callback(err);
-										} else {
-											if(nativeOnly) {
-												callback(null);
+									unpackagedTypes.push(upackType);
+								}
+							}
+							opts.unpackaged.types = unpackagedTypes;
+							console.log(tag + "begin retrieve data");
+							retrieveData(client, opts, zipFileName, function(err){
+								if(err) {
+									callback(err);
+								} else {
+									if(nativeOnly) {
+										callback(null);
+									} else {
+										S3service.uplaodData(zipFileName, function(err, key){
+											if(err) {
+												callback("uplaodData error" + err);
 											} else {
-												S3service.uplaodData(zipFileName, function(err, key){
-													if(err) {
-														callback("uplaodData error" + err);
-													} else {
-														callback(null, key);
-													}
-												});
+												callback(null, key);
 											}
-										}
-									});
+											removeFile(zipFileName);
+										});
+									}
 								}
 							});
-					// 	}
-					// });
+						}
+					});
 				}
 			});
 		}
@@ -684,12 +678,12 @@ var retrieveData = function(client,opts,fileName,callback){
 
 var deploy = function(csId, targetSFConnId, archiveId, userId, checkOnly, callback){
 	var zipFileName = userId+"_"+archiveId+".zip";
-	var path = __dirname + "/../temp/" + zipFileName;
+	var filePath = __dirname + "/../temp/" + zipFileName;
 
 	if (!archiveId) {
 		archiveId = "realtime";
 		zipFileName = userId+"_"+archiveId+".zip";
-		path = __dirname + "/../temp/" + zipFileName;
+		filePath = __dirname + "/../temp/" + zipFileName;
 
 		archiveZip(csId, global.sfconn._id, archiveId, userId, true,
 			function(err, key){
@@ -719,23 +713,26 @@ var deploy = function(csId, targetSFConnId, archiveId, userId, checkOnly, callba
 	}
 
 	var todoDeploy = function () {
-		CommonService.checkFileExists(path,function(exists){
+		CommonService.checkFileExists(filePath,function(exists){
 			if(!exists) {
-				callback(path + " is not exists");
+				callback(filePath + " is not exists");
 			} else {
 				console.log(tag + "find file "+zipFileName + " on disk.");
 				Account.findById(targetSFConnId,function(err,sfconn){
 					if (err) {
 						callback("target Account find err");
+						removeFile(zipFileName);
 					} else {
 						CommonService.connectSFDC(sfconn,function(err,client){
 							if(err) {
 								callback("target Account cannot connect salesforce" + err);
+								removeFile(zipFileName);
 							} else {
 								console.log(tag + "connect to sfdc sucess");
-								fs.readFile(path, {encoding:"base64"},function(err,data){
+								fs.readFile(filePath, {encoding:"base64"},function(err,data){
 									if(err) {
 										callback("read file error");
+										removeFile(zipFileName);
 									} else {
 										console.log(tag + "begin do deploy");
 										var deployOptions = {
@@ -780,6 +777,7 @@ var deploy = function(csId, targetSFConnId, archiveId, userId, checkOnly, callba
 													});
 												},15000);
 											}
+											removeFile(zipFileName);
 										});
 									}
 								});
@@ -792,8 +790,14 @@ var deploy = function(csId, targetSFConnId, archiveId, userId, checkOnly, callba
 	};
 };
 
-
-//TODO
-var removeFile = function (filePath) {
-
+var removeFile = function (fileName) {
+	var filePath = __dirname + "/../temp/" + fileName;
+	CommonService.checkFileExists(filePath, function(exists){
+		if(exists) {
+			fs.unlinkSync(filePath);
+			console.log(tag + "delete " + fileName);
+		} else {
+			console.log(tag + "has no " + fileName);
+		}
+	});
 };

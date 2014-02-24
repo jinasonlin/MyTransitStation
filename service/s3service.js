@@ -41,9 +41,7 @@ exports.uplaodData = function(fileName,callback){
 							else{
 								console.log(tag + 'save file to s3 done');
 								callback(null, opts.Key);
-								fs.unlinkSync(filePath);
 								buff.fill('');
-								console.log(tag + 'delete temp file ' + filePath);
 								opts = null;
 							}
 						});
